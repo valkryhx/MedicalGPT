@@ -93,7 +93,10 @@ class ModelArguments:
         },
     )
     load_in_8bit: bool = field(default=False, metadata={"help": "Whether to load the model in 8bit mode or not."})
-    qlora_4bit: bool = field(default=False, metadata={"help": "Whether to use 4bit quantinization."})
+    
+    qlora_4bit: bool = field(
+                    default=False, metadata={"help": "Whether to use 4bit quantinization."}
+                            )
     cache_dir: Optional[str] = field(
         default=None,
         metadata={"help": "Where do you want to store the pretrained models downloaded from huggingface.co"},
@@ -382,7 +385,7 @@ def main():
         world_size = int(os.environ.get("WORLD_SIZE", 1))
         if world_size > 1:
             model_args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
-        if model_args.qlora_int4: # 启用qlora
+        if model_args.qlora_4bit: # 启用qlora
             # Quantization
             q_config = BitsAndBytesConfig(load_in_4bit=True,
                                   bnb_4bit_quant_type='nf4',
