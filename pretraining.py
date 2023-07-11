@@ -28,7 +28,16 @@ import numpy as np
 import torch
 from datasets import load_dataset
 from loguru import logger
-from peft import LoraConfig, TaskType, get_peft_model, PeftModel, prepare_model_for_int8_training
+from peft import {
+    LoraConfig, 
+    TaskType, 
+    get_peft_model, 
+    PeftModel, 
+    prepare_model_for_int8_training,
+    prepare_model_for_kbit_training,
+    set_peft_model_state_dict,
+    
+}
 from sklearn.metrics import accuracy_score
 from transformers import (
     BloomForCausalLM,
@@ -84,6 +93,7 @@ class ModelArguments:
         },
     )
     load_in_8bit: bool = field(default=False, metadata={"help": "Whether to load the model in 8bit mode or not."})
+    qlora_4bit: bool = field(default=False, metadata={"help": "Whether to use 4bit quantinization."})
     cache_dir: Optional[str] = field(
         default=None,
         metadata={"help": "Where do you want to store the pretrained models downloaded from huggingface.co"},
@@ -372,14 +382,30 @@ def main():
         world_size = int(os.environ.get("WORLD_SIZE", 1))
         if world_size > 1:
             model_args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
-        model = model_class.from_pretrained(
-            model_args.model_name_or_path,
-            load_in_8bit=model_args.load_in_8bit,
-            cache_dir=model_args.cache_dir,
-            torch_dtype=torch_dtype,
-            device_map=model_args.device_map,
-            trust_remote_code=model_args.trust_remote_code,
-        )
+        if model_args.qlora_int4: # 启用qlora
+            # Quantization
+            q_config = BitsAndBytesConfig(load_in_4bit=True,
+                                  bnb_4bit_quant_type='nf4',
+                                  bnb_4bit_use_double_quant=True,
+                                  bnb_4bit_compute_dtype=_compute_dtype_map[global_args.compute_dtype])
+            model = model_class.from_pretrained(
+                                  model_args.model_name_or_path,
+                                  quantization_config=q_config,
+                                  cache_dir=model_args.cache_dir,
+                                  torch_dtype=torch_dtype,
+                                  device_map=model_args.device_map,
+                                  trust_remote_code=model_args.trust_remote_code,
+                                 empty_init=False,   # https://github.com/THUDM/ChatGLM-6B/issues/530
+                                 )  
+        else :     
+            model = model_class.from_pretrained(
+                                 model_args.model_name_or_path,
+                                 load_in_8bit=model_args.load_in_8bit,
+                                 cache_dir=model_args.cache_dir,
+                                 torch_dtype=torch_dtype,
+                                 device_map=model_args.device_map,
+                                 trust_remote_code=model_args.trust_remote_code,
+                                 )
     else:
         raise ValueError(f"Error, model_name_or_path is None, Continue PT must be loaded from a pre-trained model")
 
