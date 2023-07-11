@@ -9,6 +9,7 @@ CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node 2 pretraining.py \
     --do_eval \
     --use_peft True \
     --seed 42 \
+    --load_in_8bit True \
     --fp16 \
     --max_train_samples 100 \
     --max_eval_samples 8 \
