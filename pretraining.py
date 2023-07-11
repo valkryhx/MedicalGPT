@@ -283,7 +283,8 @@ def fault_tolerance_data_collator(features: List) -> Dict[str, Any]:
                     batch[k] = torch.tensor(np.stack([features[0][k]] * len(features)))
                 else:
                     batch[k] = torch.tensor([features[0][k]] * len(features))
-
+    print("打印fault_tolerance_data_collator处理后的信息")
+    print(f"batch.keys()={batch.keys()},len_batch_key_labels={len(batch['labels'])}    ,len_batch_key_k={len(batch[k])}")
     return batch
 
 
