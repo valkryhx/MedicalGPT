@@ -11,6 +11,7 @@ CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node 2 pretraining.py \
     --use_peft True \
     --seed 42 \
     --fp16 \
+    --compute_dtype fp16 \
     --max_train_samples 100 \
     --max_eval_samples 8 \
     --num_train_epochs 0.05 \
