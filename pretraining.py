@@ -399,7 +399,7 @@ def main():
             q_config = BitsAndBytesConfig(load_in_4bit=True,
                                   bnb_4bit_quant_type='nf4',
                                   bnb_4bit_use_double_quant=True,
-                                  bnb_4bit_compute_dtype=_compute_dtype_map[global_args.compute_dtype])
+                                  bnb_4bit_compute_dtype=_compute_dtype_map[model_args.compute_dtype])
             model = model_class.from_pretrained(
                                   model_args.model_name_or_path,
                                   quantization_config=q_config,
