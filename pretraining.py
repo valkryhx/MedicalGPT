@@ -65,6 +65,11 @@ MODEL_CLASSES = {
     "auto": (AutoModelForCausalLM, AutoTokenizer),
 }
 
+_compute_dtype_map = {
+    'fp32': torch.float32,
+    'fp16': torch.float16,
+    'bf16': torch.bfloat16
+}
 
 @dataclass
 class ModelArguments:
@@ -97,6 +102,10 @@ class ModelArguments:
     qlora_4bit: bool = field(
                     default=False, metadata={"help": "Whether to use 4bit quantinization."}
                             )
+
+    compute_dtype:str=field(
+                        default='fp32',
+                        choices=['fp32', 'fp16', 'bf16'], metadata={"help": "training, params precision level.")
     cache_dir: Optional[str] = field(
         default=None,
         metadata={"help": "Where do you want to store the pretrained models downloaded from huggingface.co"},
