@@ -172,7 +172,7 @@ class DataTrainingArguments:
         default=None,
         metadata={
             "help": (
-                "For debugging purposes or quicker training, truncate the number of evaluation examples to this "
+                "For ging purposes or quicker training, truncate the number of evaluation examples to this "
                 "value if set."
             )
         },
@@ -615,6 +615,7 @@ def main():
             train_dataset = train_dataset.select(range(max_train_samples))
         logger.debug(f"Num train_samples: {len(train_dataset)}")
         logger.debug("Tokenized training example:")
+        logger.info("看看第一个样本的内容")
         logger.debug(tokenizer.decode(train_dataset[0]['input_ids']))
 
     eval_dataset = None
