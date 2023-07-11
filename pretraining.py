@@ -417,6 +417,7 @@ def main():
                 modules_to_save=modules_to_save)
             model = get_peft_model(model, peft_config)
         if model_args.load_in_8bit:
+            print("模型load_in_8bit=True,下面开始prepare_model_for_int8_training，从而在训练时减少显存消耗。")
             model = prepare_model_for_int8_training(model)
         model.print_trainable_parameters()
     else:
