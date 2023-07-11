@@ -28,7 +28,7 @@ import numpy as np
 import torch
 from datasets import load_dataset
 from loguru import logger
-from peft import {
+from peft import (
     LoraConfig, 
     TaskType, 
     get_peft_model, 
@@ -36,8 +36,7 @@ from peft import {
     prepare_model_for_int8_training,
     prepare_model_for_kbit_training,
     set_peft_model_state_dict,
-    
-}
+)
 from sklearn.metrics import accuracy_score
 from transformers import (
     BloomForCausalLM,
