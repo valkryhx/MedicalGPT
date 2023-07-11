@@ -105,7 +105,7 @@ class ModelArguments:
 
     compute_dtype:str=field(
                         default='fp32',
-                        choices=['fp32', 'fp16', 'bf16'], metadata={"help": "training, params precision level.")
+                        choices=['fp32', 'fp16', 'bf16'], metadata={"help": "training, params precision level."})
     cache_dir: Optional[str] = field(
         default=None,
         metadata={"help": "Where do you want to store the pretrained models downloaded from huggingface.co"},
