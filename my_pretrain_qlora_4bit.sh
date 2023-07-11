@@ -5,6 +5,7 @@ CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node 2 pretraining.py \
     --validation_file_dir ./data/pretrain \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \
+    --qlora_4bit True\
     --do_train \
     --do_eval \
     --use_peft True \
