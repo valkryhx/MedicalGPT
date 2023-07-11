@@ -51,6 +51,7 @@ from transformers import (
     TrainingArguments,
     is_torch_tpu_available,
     set_seed,
+    BitsAndBytesConfig
 )
 from transformers.trainer import TRAINING_ARGS_NAME
 from transformers.utils import send_example_telemetry
