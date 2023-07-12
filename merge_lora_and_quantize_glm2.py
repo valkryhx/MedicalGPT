@@ -64,10 +64,10 @@ def main(lora_path, output_path, remote_path, qbits=4, device_map=None):
 def parse_args():
     parser = argparse.ArgumentParser(description='ChatGLM-6B merge lora and quantize.')
     parser.add_argument('--lora_path', type=str, required=True, help='QLoRA训练后保存模型的目录')
-    parser.add_argument('--output_path', type=str, default='/tmp/merged_qlora_model', help='最终保存合并，量化后的模型目录')
-    parser.add_argument('--qbits', type=int, default=4, help='模型量化位数')
+    parser.add_argument('--output_path', type=str, default='./tmp/merged_qlora_model', help='最终保存合并，量化后的模型目录')
+    parser.add_argument('--qbits', type=int, default=4, help='模型量化位数,可以填4或者8 ，如果非这两个值 则不量化。')
     parser.add_argument('--device', type=str, default='auto', help='device_map')
-    parser.add_argument('--remote_scripts_dir', type=str, default='remote_scripts/chatglm2-6b', help='官方脚本目录')
+    parser.add_argument('--remote_scripts_dir', type=str, default='./remote_scripts/chatglm2-6b', help='官方脚本目录')
     return parser.parse_args()
 
 
