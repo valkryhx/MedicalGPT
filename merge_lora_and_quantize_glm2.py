@@ -21,7 +21,7 @@ def merge_lora(lora_path, device_map=None):
     config = PeftConfig.from_pretrained(lora_path)
     base_model = AutoModel.from_pretrained(config.base_model_name_or_path,
                                            load_in_8bit=False,
-                                           trust_remote_code=True, torch_dtype=torch.float32,
+                                           trust_remote_code=True, torch_dtype=torch.float16,
                                            device_map=device_map)
     # check_weight = base_model.transformer.layers[0].attention.query_key_value.weight
     # check_weight_old = check_weight.clone()
