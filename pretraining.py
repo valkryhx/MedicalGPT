@@ -695,7 +695,8 @@ def main():
         if training_args.resume_from_checkpoint is not None:
             checkpoint = training_args.resume_from_checkpoint
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
-
+        trainer.model.save_pretrained(training_args.output_dir.output_dir)
+        print(f"20230717 peft model saved")
         metrics = train_result.metrics
         metrics["train_samples"] = max_train_samples
         logger.debug(f"Training metrics: {metrics}")
