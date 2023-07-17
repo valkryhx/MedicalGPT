@@ -487,25 +487,29 @@ def main():
     # Main data processing function that will concatenate all texts from our dataset and generate chunks of block_size.
     def group_texts(examples):
         # Concatenate all texts.
-        #ADD 20230717#   可以看到key 其实就是 input_ids / attention_mask / position_ids  这三个值 对应的3个value分别是3个list
+        #ADD 20230717#   可以看到key 其实就是 input_ids / attention_mask / position_ids  这三个值 对应的3个value分别是3个list  多个元素
         for k in examples.keys():
             print(f"key={k}\nvalue={examples[k]}")
         #raise ValueError("DEUBUGGING : STOP here")
         #ADD end#
-        concatenated_examples = {k: list(chain(*examples[k])) for k in examples.keys()}  # concatenate之后 k对应的value是一个list
+        concatenated_examples = {k: list(chain(*examples[k])) for k in examples.keys()}  # concatenate之后 k对应的value是一个list  每个list里面只有一个很长的元素
         print(f"concatenated_examples={concatenated_examples}") #add
         total_length = len(concatenated_examples[list(examples.keys())[0]])
+        print("total_length={total_length}")
         print(f"[list(examples.keys())={list(examples.keys())}") #add
         # We drop the small remainder, we could add padding if the model supported it instead of this drop, you can
         # customize this part to your needs.
         if total_length >= block_size:
             total_length = (total_length // block_size) * block_size
         # Split by chunks of max_len.
-        result = {
+        result = {   # 这里又把 很长的元素按照block_size切分成固定长度的多个元素
             k: [t[i: i + block_size] for i in range(0, total_length, block_size)]
             for k, t in concatenated_examples.items()
         }
         result["labels"] = result["input_ids"].copy()
+        print(result)
+        raise ValueError("DEUBUGGING : STOP here")
+        
         return result
 
     # Get the datasets: you can either provide your own CSV/JSON/TXT training and evaluation files (see below)
