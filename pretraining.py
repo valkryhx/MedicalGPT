@@ -586,23 +586,25 @@ def main():
                 load_from_cache_file=not data_args.overwrite_cache,
                 desc="Running tokenizer on dataset",
             )
-            lm_datasets = tokenized_datasets.map(
-                group_texts,
-                batched=True,
-                num_proc=data_args.preprocessing_num_workers,
-                load_from_cache_file=not data_args.overwrite_cache,
-                desc=f"Grouping texts in chunks of {block_size}",
-            )
+            lm_datasets = tokenized_datasets
+            # lm_datasets = tokenized_datasets.map(
+            #     group_texts,
+            #     batched=True,
+            #     num_proc=data_args.preprocessing_num_workers,
+            #     load_from_cache_file=not data_args.overwrite_cache,
+            #     desc=f"Grouping texts in chunks of {block_size}",
+            # )
         else:
             tokenized_datasets = raw_datasets.map(
                 tokenize_function,
                 batched=True,
                 remove_columns=column_names,
             )
-            lm_datasets = tokenized_datasets.map(
-                group_texts,
-                batched=True,
-            )
+            lm_datasets = tokenized_datasets
+            # lm_datasets = tokenized_datasets.map(
+            #     group_texts,
+            #     batched=True,
+            # )
 
     train_dataset = None
     max_train_samples = 0
