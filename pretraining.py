@@ -501,6 +501,12 @@ def main():
         result["labels"] = result["input_ids"].copy()
         return result
 
+    
+    def no_group_texts_only_add_labels(examples):
+        """不做group text，每行就是一个sample，保持原样。这里仅仅添加labels"""
+        examples["labels"] = examples["input_ids"].copy()
+        return examples
+
     # Get the datasets: you can either provide your own CSV/JSON/TXT training and evaluation files (see below)
     # or just provide the name of one of the public datasets available on the hub at https://huggingface.co/datasets/
     # (the dataset will be downloaded automatically from the datasets Hub).
@@ -586,25 +592,27 @@ def main():
                 load_from_cache_file=not data_args.overwrite_cache,
                 desc="Running tokenizer on dataset",
             )
-            lm_datasets = tokenized_datasets
-            # lm_datasets = tokenized_datasets.map(
-            #     group_texts,
-            #     batched=True,
-            #     num_proc=data_args.preprocessing_num_workers,
-            #     load_from_cache_file=not data_args.overwrite_cache,
-            #     desc=f"Grouping texts in chunks of {block_size}",
-            # )
+            #lm_datasets = tokenized_datasets
+            lm_datasets = tokenized_datasets.map(
+                #group_texts,
+                no_group_texts_only_add_labels ,
+                batched=True,
+                num_proc=data_args.preprocessing_num_workers,
+                load_from_cache_file=not data_args.overwrite_cache,
+                desc=f"Grouping texts in chunks of {block_size}",
+            )
         else:
             tokenized_datasets = raw_datasets.map(
                 tokenize_function,
                 batched=True,
                 remove_columns=column_names,
             )
-            lm_datasets = tokenized_datasets
-            # lm_datasets = tokenized_datasets.map(
-            #     group_texts,
-            #     batched=True,
-            # )
+            #lm_datasets = tokenized_datasets
+            lm_datasets = tokenized_datasets.map(
+                no_group_texts_only_add_labels ,
+                #group_texts,
+                batched=True,
+            )
 
     train_dataset = None
     max_train_samples = 0
