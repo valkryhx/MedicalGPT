@@ -507,7 +507,7 @@ def main():
             for k, t in concatenated_examples.items()
         }
         result["labels"] = result["input_ids"].copy()
-        #print(result)
+        print(result)
         #raise ValueError("DEUBUGGING : STOP here")  #
         
         return result
