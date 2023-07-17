@@ -102,7 +102,8 @@ class ModelArguments:
     qlora_4bit: bool = field(
                     default=False, metadata={"help": "Whether to use 4bit quantinization."}
                             )
-
+    load_best_model_at_end: bool=field(default=True ,metadata={"help": "save the best model during training , --save_total_limit must set >=2。 "} )
+    
     compute_dtype:str=field(
                         default='fp32',
                          metadata={"help": "training, params precision level,choices=['fp32', 'fp16', 'bf16']."})
