@@ -508,7 +508,7 @@ def main():
         }
         result["labels"] = result["input_ids"].copy()
         print(result)
-        raise ValueError("DEUBUGGING : STOP here")
+        raise ValueError("DEUBUGGING : STOP here")  #
         
         return result
 
