@@ -455,6 +455,22 @@ def main():
                 lora_dropout=training_args.lora_dropout,
                 modules_to_save=modules_to_save)
             model = get_peft_model(model, peft_config)
+
+            resume_from_checkpoint = global_args.resume_from_checkpoint
+           if resume_from_checkpoint is not None:
+               checkpoint_name = os.path.join(resume_from_checkpoint, 'pytorch_model.bin')
+           if not os.path.exists(checkpoint_name):
+               checkpoint_name = os.path.join(
+                  resume_from_checkpoint, 'adapter_model.bin'
+                )
+               resume_from_checkpoint = False
+           if os.path.exists(checkpoint_name):
+               logger.info(f'Restarting from {checkpoint_name}')
+               adapters_weights = torch.load(checkpoint_name)
+               set_peft_model_state_dict(model, adapters_weights)
+           else:
+               logger.info(f'Checkpoint {checkpoint_name} not found')
+        
         if model_args.load_in_8bit:
             print("模型load_in_8bit=True,下面开始prepare_model_for_int8_training，从而在训练时减少显存消耗。")
             model = prepare_model_for_int8_training(model)
