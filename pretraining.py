@@ -28,7 +28,15 @@ import numpy as np
 import torch
 from datasets import load_dataset
 from loguru import logger
-from peft import LoraConfig, TaskType, get_peft_model, PeftModel, prepare_model_for_int8_training
+from peft import (
+    LoraConfig, 
+    TaskType, 
+    get_peft_model, 
+    PeftModel, 
+    prepare_model_for_int8_training,
+    prepare_model_for_kbit_training,
+    set_peft_model_state_dict,
+)
 from sklearn.metrics import accuracy_score
 from transformers import (
     BloomForCausalLM,
@@ -43,6 +51,7 @@ from transformers import (
     TrainingArguments,
     is_torch_tpu_available,
     set_seed,
+    BitsAndBytesConfig
 )
 from transformers.trainer import TRAINING_ARGS_NAME
 from transformers.utils import send_example_telemetry
@@ -56,6 +65,11 @@ MODEL_CLASSES = {
     "auto": (AutoModelForCausalLM, AutoTokenizer),
 }
 
+_compute_dtype_map = {
+    'fp32': torch.float32,
+    'fp16': torch.float16,
+    'bf16': torch.bfloat16
+}
 
 @dataclass
 class ModelArguments:
@@ -84,6 +98,14 @@ class ModelArguments:
         },
     )
     load_in_8bit: bool = field(default=False, metadata={"help": "Whether to load the model in 8bit mode or not."})
+    
+    qlora_4bit: bool = field(
+                    default=False, metadata={"help": "Whether to use 4bit quantinization."}
+                            )
+
+    compute_dtype:str=field(
+                        default='fp32',
+                         metadata={"help": "training, params precision level,choices=['fp32', 'fp16', 'bf16']."})
     cache_dir: Optional[str] = field(
         default=None,
         metadata={"help": "Where do you want to store the pretrained models downloaded from huggingface.co"},
@@ -150,7 +172,7 @@ class DataTrainingArguments:
         default=None,
         metadata={
             "help": (
-                "For debugging purposes or quicker training, truncate the number of evaluation examples to this "
+                "For ging purposes or quicker training, truncate the number of evaluation examples to this "
                 "value if set."
             )
         },
@@ -261,7 +283,8 @@ def fault_tolerance_data_collator(features: List) -> Dict[str, Any]:
                     batch[k] = torch.tensor(np.stack([features[0][k]] * len(features)))
                 else:
                     batch[k] = torch.tensor([features[0][k]] * len(features))
-
+    #print("打印fault_tolerance_data_collator处理后的信息")
+    #print(f"batch.keys()={batch.keys()},len_batch_key_labels={len(batch['labels'])}    ,len_batch_key_k={len(batch[k])}")
     return batch
 
 
@@ -372,14 +395,30 @@ def main():
         world_size = int(os.environ.get("WORLD_SIZE", 1))
         if world_size > 1:
             model_args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
-        model = model_class.from_pretrained(
-            model_args.model_name_or_path,
-            load_in_8bit=model_args.load_in_8bit,
-            cache_dir=model_args.cache_dir,
-            torch_dtype=torch_dtype,
-            device_map=model_args.device_map,
-            trust_remote_code=model_args.trust_remote_code,
-        )
+        if model_args.qlora_4bit: # 启用qlora
+            # Quantization
+            q_config = BitsAndBytesConfig(load_in_4bit=True,
+                                  bnb_4bit_quant_type='nf4',
+                                  bnb_4bit_use_double_quant=True,
+                                  bnb_4bit_compute_dtype=_compute_dtype_map[model_args.compute_dtype])
+            model = model_class.from_pretrained(
+                                  model_args.model_name_or_path,
+                                  quantization_config=q_config,
+                                  cache_dir=model_args.cache_dir,
+                                  torch_dtype=torch_dtype,
+                                  device_map=model_args.device_map,
+                                  trust_remote_code=model_args.trust_remote_code,
+                                 empty_init=False,   # https://github.com/THUDM/ChatGLM-6B/issues/530
+                                 )  
+        else :     
+            model = model_class.from_pretrained(
+                                 model_args.model_name_or_path,
+                                 load_in_8bit=model_args.load_in_8bit,
+                                 cache_dir=model_args.cache_dir,
+                                 torch_dtype=torch_dtype,
+                                 device_map=model_args.device_map,
+                                 trust_remote_code=model_args.trust_remote_code,
+                                 )
     else:
         raise ValueError(f"Error, model_name_or_path is None, Continue PT must be loaded from a pre-trained model")
 
@@ -417,6 +456,7 @@ def main():
                 modules_to_save=modules_to_save)
             model = get_peft_model(model, peft_config)
         if model_args.load_in_8bit:
+            print("模型load_in_8bit=True,下面开始prepare_model_for_int8_training，从而在训练时减少显存消耗。")
             model = prepare_model_for_int8_training(model)
         model.print_trainable_parameters()
     else:
@@ -455,7 +495,7 @@ def main():
             total_length = (total_length // block_size) * block_size
         # Split by chunks of max_len.
         result = {
-            k: [t[i: i + block_size] for i in range(0, total_length, block_size)]
+            k: [t[i: i + block_size] +[2] for i in range(0, total_length, block_size)]
             for k, t in concatenated_examples.items()
         }
         result["labels"] = result["input_ids"].copy()
@@ -576,6 +616,7 @@ def main():
             train_dataset = train_dataset.select(range(max_train_samples))
         logger.debug(f"Num train_samples: {len(train_dataset)}")
         logger.debug("Tokenized training example:")
+        logger.info("看看第一个样本的内容")
         logger.debug(tokenizer.decode(train_dataset[0]['input_ids']))
 
     eval_dataset = None
