@@ -456,7 +456,7 @@ def main():
                 modules_to_save=modules_to_save)
             model = get_peft_model(model, peft_config)
 
-            resume_from_checkpoint = global_args.resume_from_checkpoint
+            resume_from_checkpoint =  training_args.resume_from_checkpoint
             if resume_from_checkpoint is not None:
                 checkpoint_name = os.path.join(resume_from_checkpoint, 'pytorch_model.bin')
             if not os.path.exists(checkpoint_name):
