@@ -102,7 +102,6 @@ class ModelArguments:
     qlora_4bit: bool = field(
                     default=False, metadata={"help": "Whether to use 4bit quantinization."}
                             )
-    load_best_model_at_end: bool=field(default=True ,metadata={"help": "save the best model during training , --save_total_limit must set >=2。 "} )
     
     compute_dtype:str=field(
                         default='fp32',
@@ -646,6 +645,9 @@ def main():
         model.is_parallelizable = True
         model.model_parallel = True
 
+    #add 20230717
+    training_args.load_best_model_at_end=True
+    #add end 
     trainer = SavePeftModelTrainer(
         model=model,
         args=training_args,
