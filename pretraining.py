@@ -495,7 +495,7 @@ def main():
         concatenated_examples = {k: list(chain(*examples[k])) for k in examples.keys()}  # concatenate之后 k对应的value是一个list  每个list里面只有一个很长的元素
         print(f"concatenated_examples={concatenated_examples}") #add
         total_length = len(concatenated_examples[list(examples.keys())[0]])
-        print("total_length={total_length}")
+        print(f"total_length={total_length}")
         print(f"[list(examples.keys())={list(examples.keys())}") #add
         # We drop the small remainder, we could add padding if the model supported it instead of this drop, you can
         # customize this part to your needs.
@@ -503,12 +503,12 @@ def main():
             total_length = (total_length // block_size) * block_size
         # Split by chunks of max_len.
         result = {   # 这里又把 很长的元素按照block_size切分成固定长度的多个元素
-            k: [t[i: i + block_size] for i in range(0, total_length, block_size)]
+            k: [t[i: i + block_size] for i in range(0, total_length, block_size)] +[2]
             for k, t in concatenated_examples.items()
         }
         result["labels"] = result["input_ids"].copy()
-        print(result)
-        raise ValueError("DEUBUGGING : STOP here")  #
+        #print(result)
+        #raise ValueError("DEUBUGGING : STOP here")  #
         
         return result
 
