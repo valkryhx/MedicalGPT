@@ -487,13 +487,15 @@ def main():
     # Main data processing function that will concatenate all texts from our dataset and generate chunks of block_size.
     def group_texts(examples):
         # Concatenate all texts.
-        #ADD 20230717#
+        #ADD 20230717#   可以看到key 其实就是 input_ids / attention_mask / position_ids  这三个值 对应的3个value分别是3个list
         for k in examples.keys():
-            print(f"key={k},value={examples[k]}")
-        raise ValueError("DEUBUGGING : STOP here")
+            print(f"key={k}\nvalue={examples[k]}")
+        #raise ValueError("DEUBUGGING : STOP here")
         #ADD end#
-        concatenated_examples = {k: list(chain(*examples[k])) for k in examples.keys()}
+        concatenated_examples = {k: list(chain(*examples[k])) for k in examples.keys()}  # concatenate之后 k对应的value是一个list
+        print(f"concatenated_examples={concatenated_examples}") #add
         total_length = len(concatenated_examples[list(examples.keys())[0]])
+        print(f"[list(examples.keys())={[list(examples.keys())}") #add
         # We drop the small remainder, we could add padding if the model supported it instead of this drop, you can
         # customize this part to your needs.
         if total_length >= block_size:
