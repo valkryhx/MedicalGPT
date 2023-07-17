@@ -704,7 +704,7 @@ def main():
         trainer.save_metrics("train", metrics)
         trainer.save_state()
         logger.info(f"Saving model checkpoint to {training_args.output_dir}")
-        save_model(training_args.output_dir, model, tokenizer, training_args)
+        #save_model(training_args.output_dir, model, tokenizer, training_args)
 
     # Evaluation
     if training_args.do_eval:
