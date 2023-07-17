@@ -495,7 +495,7 @@ def main():
         concatenated_examples = {k: list(chain(*examples[k])) for k in examples.keys()}  # concatenate之后 k对应的value是一个list
         print(f"concatenated_examples={concatenated_examples}") #add
         total_length = len(concatenated_examples[list(examples.keys())[0]])
-        print(f"[list(examples.keys())={[list(examples.keys())}") #add
+        print(f"[list(examples.keys())={list(examples.keys())}") #add
         # We drop the small remainder, we could add padding if the model supported it instead of this drop, you can
         # customize this part to your needs.
         if total_length >= block_size:
