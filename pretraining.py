@@ -510,7 +510,7 @@ def main():
         result["labels"] = result["input_ids"].copy()
         print(result)
         print(f"block_size={block_size}")
-        raise ValueError("DEUBUGGING : STOP here")  #
+        #raise ValueError("DEUBUGGING : STOP here")  #
         
         return result
 
