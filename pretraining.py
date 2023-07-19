@@ -422,7 +422,7 @@ def main():
     else:
         raise ValueError(f"Error, model_name_or_path is None, Continue PT must be loaded from a pre-trained model")
 
-    print(f'memory footprint of model: {model.get_memory_footprint()/(1024*1024*1024)} GB')
+    logger.info(f'memory footprint of model: {model.get_memory_footprint()/(1024*1024*1024)} GB')
     tokenizer_kwargs = {
         "cache_dir": model_args.cache_dir,
         "use_fast": model_args.use_fast_tokenizer,
