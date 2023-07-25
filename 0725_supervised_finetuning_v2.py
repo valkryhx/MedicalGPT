@@ -635,7 +635,7 @@ def main():
                                   torch_dtype=torch_dtype,
                                   device_map=model_args.device_map,
                                   trust_remote_code=model_args.trust_remote_code,
-                                  empty_init=False,   # https://github.com/THUDM/ChatGLM-6B/issues/530
+                                  #empty_init=False,   # https://github.com/THUDM/ChatGLM-6B/issues/530
                                  )  
         else :     
             model = model_class.from_pretrained(
