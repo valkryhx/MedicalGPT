@@ -617,7 +617,7 @@ def main():
         )
         world_size = int(os.environ.get("WORLD_SIZE", 1))
         ddp = world_size != 1
-       logger.info(f"world_size={world_size} , ddp={ddp}")
+        logger.info(f"world_size={world_size} , ddp={ddp}")
         if world_size > 1:
             model_args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
         if training_args.qlora: # 启用qlora    ##########20230725 ADD
