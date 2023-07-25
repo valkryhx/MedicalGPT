@@ -617,35 +617,42 @@ def main():
         )
         world_size = int(os.environ.get("WORLD_SIZE", 1))
         ddp = world_size != 1
-        if ddp:
+       logger.info(f"world_size={world_size} , ddp={ddp}")
+        if world_size > 1:
             model_args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
-        if training_args.qlora and (len(training_args.fsdp) > 0 or deepspeed.is_deepspeed_zero3_enabled()):
-            logger.warning("FSDP and ZeRO3 are both currently incompatible with QLoRA.")
-        config = config_class.from_pretrained(
-            model_args.model_name_or_path,
-            trust_remote_code=model_args.trust_remote_code,
-            torch_dtype=torch_dtype,
-            cache_dir=model_args.cache_dir
-        )
-        model = model_class.from_pretrained(
-            model_args.model_name_or_path,
-            config=config,
-            load_in_8bit=model_args.load_in_8bit,
-            low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
-            device_map=model_args.device_map,
-            trust_remote_code=model_args.trust_remote_code,
-            quantization_config=BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_use_double_quant=True,
-                bnb_4bit_quant_type="nf4",
-                bnb_4bit_compute_dtype=torch_dtype,
-            ) if training_args.qlora else None,
-        )
+        if training_args.qlora: # 启用qlora    ##########20230725 ADD
+            logger.info(f'training_args.qlora: {training_args.qlora}')
+            # Quantization
+            q_config = BitsAndBytesConfig(load_in_4bit=True,
+                                  bnb_4bit_quant_type='nf4',
+                                  bnb_4bit_use_double_quant=True,
+                                  bnb_4bit_compute_dtype=torch.float16 ,#_compute_dtype_map[model_args.compute_dtype]
+                                         )
+            model = model_class.from_pretrained(
+                                  model_args.model_name_or_path,
+                                  quantization_config=q_config,
+                                  cache_dir=model_args.cache_dir,
+                                  torch_dtype=torch_dtype,
+                                  device_map=model_args.device_map,
+                                  trust_remote_code=model_args.trust_remote_code,
+                                  empty_init=False,   # https://github.com/THUDM/ChatGLM-6B/issues/530
+                                 )  
+        else :     
+            model = model_class.from_pretrained(
+                                 model_args.model_name_or_path,
+                                 load_in_8bit=model_args.load_in_8bit,
+                                 cache_dir=model_args.cache_dir,
+                                 torch_dtype=torch_dtype,
+                                 device_map=model_args.device_map,
+                                 trust_remote_code=model_args.trust_remote_code,
+                                 )
         if hasattr(model, 'lm_head'):
             model.lm_head = CastOutputToFloat(model.lm_head)
+        if hasattr(model, 'output_layer'):    ##########modify 20230725 chatglm2 最后一层是output_layer chatglm是lm_head
+            model.output_layer = CastOutputToFloat(model.output_layer)
     else:
         raise ValueError(f"Error, model_name_or_path is None, SFT must be loaded from a pre-trained model")
-
+    logger.info(f'memory footprint of model: {model.get_memory_footprint()/(1024*1024*1024)} GB')
     # Load tokenizer
     tokenizer_kwargs = {
         "cache_dir": model_args.cache_dir,
@@ -878,7 +885,7 @@ def main():
         model.enable_input_require_grads()
     except:
         logger.warning(f"Could not enable input require_grads on model, skipping.")
-    if not ddp and torch.cuda.device_count() > 1:
+    if not ddp and torch.cuda.device_count() > 1  and model_args.model_type !="chatglm":  ######## 20230725
         # Keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
         model.is_parallelizable = True
         model.model_parallel = True
