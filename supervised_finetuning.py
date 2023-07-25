@@ -288,7 +288,7 @@ def main():
             load_in_8bit=model_args.load_in_8bit,
             cache_dir=model_args.cache_dir,
             torch_dtype=torch_dtype,
-            device_map=model_args.device_map,
+            #device_map=model_args.device_map,       ############ modidy 20230725 for deepspeed because dp doesn't allow device_map to be set manually
             trust_remote_code=model_args.trust_remote_code,
             quantization_config=BitsAndBytesConfig(
                 load_in_4bit=True,
@@ -299,6 +299,8 @@ def main():
         )
         if hasattr(model, 'lm_head'):
             model.lm_head = CastOutputToFloat(model.lm_head)
+        if hasattr(model, 'output_layer'):     ############ modidy 20230725     chatglm2-6b output_layer ,lm_head is for old chatglm-6b
+            model.output_layer = CastOutputToFloat(model.output_layer)
     else:
         raise ValueError(f"Error, model_name_or_path is None, SFT must be loaded from a pre-trained model")
 
