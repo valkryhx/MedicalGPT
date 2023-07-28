@@ -328,7 +328,7 @@ def save_model(output_dir, model, tokenizer, args):
     tokenizer.save_pretrained(output_dir)
     logger.info("@@@@@@@@@@@@@@@@@@@@@@@ SAVE STEP 2/3")
     #torch.save(args, os.path.join(output_dir, TRAINING_ARGS_NAME))
-    torch.save(args, os.path.join(output_dir, "training_args.bin"E))
+    torch.save(args, os.path.join(output_dir, "training_args.bin"))
     logger.info("@@@@@@@@@@@@@@@@@@@@@@@ SAVE STEP 3/3")
 
 
