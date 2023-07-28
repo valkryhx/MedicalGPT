@@ -85,6 +85,7 @@ class ModelArguments:
             )
         },
     )
+    load_in_4bit: bool = field(default=False, metadata={"help": "Very important to play on kaggle!!!Whether to load the model in 4bit mode or not."})
     load_in_8bit: bool = field(default=False, metadata={"help": "Whether to load the model in 8bit mode or not."})
     cache_dir: Optional[str] = field(
         default=None,
