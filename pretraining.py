@@ -347,7 +347,25 @@ def print_trainable_parameters(model):
     )
 
 
-def find_all_linear_names(peft_model, int4=False, int8=False):
+def find_all_linear_names(model):   ## add 20230728
+    """
+    找出所有全连接层，为所有全连接添加adapter
+    """
+    cls = bnb.nn.Linear4bit
+    lora_module_names = set()
+    for name, module in model.named_modules():
+        if isinstance(module, cls):
+            names = name.split('.')
+            lora_module_names.add(names[0] if len(names) == 1 else names[-1])
+
+    if 'lm_head' in lora_module_names:  # needed for 16-bit
+        lora_module_names.remove('lm_head')
+    if  'output_layer' in lora_module_names:
+        lora_module_names.remove('output_layer')
+    return list(lora_module_names)
+
+
+def find_all_linear_names_old(peft_model, int4=False, int8=False):
     """Find all linear layer names in the model. reference from qlora paper."""
     cls = torch.nn.Linear
     if int4 or int8:
@@ -462,7 +480,8 @@ def main():
             logger.info("Init new peft model")
             target_modules = training_args.target_modules.split(',') if training_args.target_modules else None
             if target_modules and 'all' in target_modules:
-                target_modules = find_all_linear_names(model, int4=False, int8=model_args.load_in_8bit)
+                ##target_modules = find_all_linear_names(model, int4=False, int8=model_args.load_in_8bit)
+                target_modules = find_all_linear_names(model)
             modules_to_save = training_args.modules_to_save
             if modules_to_save is not None:
                 modules_to_save = modules_to_save.split(',')
