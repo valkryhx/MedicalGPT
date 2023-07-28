@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from glob import glob
 from itertools import chain
 from typing import Optional, List, Dict, Any, Mapping
-
+import bitsandbytes as bnb
 import numpy as np
 import torch
 from datasets import load_dataset
@@ -369,7 +369,6 @@ def find_all_linear_names_old(peft_model, int4=False, int8=False):
     """Find all linear layer names in the model. reference from qlora paper."""
     cls = torch.nn.Linear
     if int4 or int8:
-        import bitsandbytes as bnb
         if int4:
             cls = bnb.nn.Linear4bit
         elif int8:
