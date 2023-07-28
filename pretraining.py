@@ -466,6 +466,10 @@ def main():
             modules_to_save = training_args.modules_to_save
             if modules_to_save is not None:
                 modules_to_save = modules_to_save.split(',')
+
+            logger.info("prepare_model_for_kbit_training...")  ## add  
+            model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True) ## add  不能写在这里 这会让trainable args为0 要写在加载loraConfig之前
+            
             logger.info(f"Peft target_modules: {target_modules}")
             logger.info(f"Peft lora_rank: {training_args.lora_rank}")
             peft_config = LoraConfig(
@@ -479,8 +483,8 @@ def main():
             model = get_peft_model(model, peft_config)
         ##if model_args.load_in_8bit:
         ##    model = prepare_model_for_int8_training(model)
-        logger.info("prepare_model_for_kbit_training...")  ## add
-        model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True) ## add
+        #logger.info("prepare_model_for_kbit_training...")  ## add  
+        #model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True) ## add  不能写在这里 这会让trainable args为0 要写在加载loraConfig之前
         model.print_trainable_parameters()
     else:
         logger.info("Full parameters training")
