@@ -493,6 +493,22 @@ def main():
     # Main data processing function that will concatenate all texts from our dataset and generate chunks of block_size.
     def group_texts(examples):
         # Concatenate all texts.
+        """
+        chain方法相当于是将多个list合并，例如list(chain([1,2] ,[3,4])) = [1,2,3,4]   见 https://blog.csdn.net/smart_liu8/article/details/81708620
+        examples 按照tokenizer batch=True的做法 是所有行句子做完分词后的对象 比如100行 ，
+        那么examples是个dict，其中仍然只有3个key： input_ids ,attention,position
+        input_ids 对应的是list，长度为100 ，list中每个元素为每一行句子的tokens 结果。
+        attention和postion同理。
+        现在k = "input_ids"
+        那么chain(*examples[k]) 就是 sent1_input_ids ,sent2_input_ids,sent3_input_ids,的一个迭代器
+        然后用list（迭代器）生成一个list，最后这个list相当于是将所有行句子组成的段落做了tokenize
+        最后concatenated_examples里面还是三个key：input_ids ,attention,position
+        input_ids是所有行构成的长句子的token结果的list 
+        attention应该是一个list 其中全部是1
+        postion应该是 0,1,2,3,4,5,...0,1,2,3,,,,0,1,2,3,4,5,6 这样多次出现0开始的序列 因为是原来小句子的结果直接拼的 所以这个position其实没用
+        下面的代码只用input_ids 这个最终的list。
+        为什么这么折腾了半天 只是为了获取段落级别的长 token list呢 ？？我猜是因为tokenize不能跨行 所以每次只能按照行来切成多个小的 最后拼接成大的。
+        """
         concatenated_examples = {k: list(chain(*examples[k])) for k in examples.keys()}
         total_length = len(concatenated_examples[list(examples.keys())[0]])
         # We drop the small remainder, we could add padding if the model supported it instead of this drop, you can
@@ -500,6 +516,16 @@ def main():
         if total_length >= block_size:
             total_length = (total_length // block_size) * block_size
         # Split by chunks of max_len.
+        """
+        上面还把多余的零头token去掉了 因为total_length只取到block_size的整数倍
+        下面的处理过程是将input_ids这个整数倍的长token list 又按照block_size 切成一节一节的小list，把小list的列表作为value，与"input_ids"对应  attention和position同理
+        结合上面我写的笔记 整个原始语料的处理流程是类似火车载货组装：
+        1.长度不等的各个车厢拼接到一起 去掉多余零头
+        2.按照标准的block_size将其再度切分 这样每节车厢长度相同，程序不会报错，后面似乎也可以不padding，因为已经是整齐长度了
+        3. input_ids 直接复制， 作为labels ，也就是后需要自回归训练，input_ids是输入（实际是并行输入，比如根据W1预测W2，W1W2预测W3，...,W1W2..Wn-1预测Wn，这是可以同时计算和label中对应token的loss的），
+        label中的token是标准答案。并且自回归时label没有ignore，也就是没有可以忽略loss的部分 所有token都要计算。
+        根据这个二次预训练的代码，我把自回归理解了思考了一遍。
+        """
         result = {
             k: [t[i: i + block_size] for i in range(0, total_length, block_size)]
             for k, t in concatenated_examples.items()
