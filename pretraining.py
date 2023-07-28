@@ -389,13 +389,13 @@ def main():
                                          )
             model = model_class.from_pretrained(
                                   model_args.model_name_or_path,
-                                  #load_in_4bit=model_args.load_in_4bit,
+                                  load_in_4bit=model_args.load_in_4bit,
                                   quantization_config=q_config,
                                   cache_dir=model_args.cache_dir,
                                   torch_dtype=torch_dtype,
                                   device_map=model_args.device_map,
                                   trust_remote_code=model_args.trust_remote_code,
-                                  #empty_init=False,   # https://github.com/THUDM/ChatGLM-6B/issues/530
+                                  empty_init=False,   # https://github.com/THUDM/ChatGLM-6B/issues/530
                                  )  
         else :     
             model = model_class.from_pretrained(
