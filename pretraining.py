@@ -304,33 +304,32 @@ class SavePeftModelTrainer_old(Trainer):
         ############torch.save(self.args, os.path.join(output_dir, "training_args.bin"))  老子把这行注释总行了吧
         logger.info("DO NOT SAVE THE FXXKING HUGE training args of deepspeed in SavePeftModelTrainer.traininig")
 
-class SavePeftModelTrainer(Trainer):
-    print("save !!!!!!")
-    def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
-        """只保存adapter"""
-        logger.info("save 123 !!!!!!")
-        if output_dir is None:
-            output_dir = self.args.output_dir
-        self.model.save_pretrained(output_dir)
-        ############torch.save(self.args, os.path.join(output_dir, "training_args.bin"))  老子把这行注释总行了吧
-        logger.info("DO NOT SAVE THE FXXKING HUGE training args of deepspeed in SavePeftModelTrainer.traininig")
-        logger.info("save 123 done !!!!!!")
+class SavePeftModelTrainer(Trainer):  ### from its sft.py
+    """
+    Trainer for lora models
+    """
+
+    def save_model(self, output_dir=None, _internal_call=False):
+        """Save the LoRA model."""
+        os.makedirs(output_dir, exist_ok=True)
+        if self.args.local_rank in [-1, 0]:
+            torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
+            self.model.save_pretrained(output_dir)
 
 
-def save_model(output_dir, model, tokenizer, args):
+def save_model(output_dir, model, tokenizer, args):  from its sft.py
     """Save the model and the tokenizer."""
     os.makedirs(output_dir, exist_ok=True)
 
     # Take care of distributed/parallel training
-    logger.info("@@@@@@@@@@@@@@@@@@@@@@@ SAVE STEP 0/3")
     model_to_save = model.module if hasattr(model, "module") else model
-    model_to_save.save_pretrained(output_dir)
-    logger.info("@@@@@@@@@@@@@@@@@@@@@@@ SAVE STEP 1/3")
-    tokenizer.save_pretrained(output_dir)
-    logger.info("@@@@@@@@@@@@@@@@@@@@@@@ SAVE STEP 2/3")
-    #torch.save(args, os.path.join(output_dir, TRAINING_ARGS_NAME))
-    torch.save(args, os.path.join(output_dir, "training_args.bin"))
-    logger.info("@@@@@@@@@@@@@@@@@@@@@@@ SAVE STEP 3/3")
+    if args.local_rank in [-1, 0]:
+        model_to_save.save_pretrained(output_dir)
+        tokenizer.save_pretrained(output_dir)
+        torch.save(args, os.path.join(output_dir, TRAINING_ARGS_NAME))
+
+
+
 
 
 def print_trainable_parameters(model):
