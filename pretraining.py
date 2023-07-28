@@ -306,10 +306,14 @@ def save_model(output_dir, model, tokenizer, args):
     os.makedirs(output_dir, exist_ok=True)
 
     # Take care of distributed/parallel training
+    logger.info("@@@@@@@@@@@@@@@@@@@@@@@ SAVE STEP 0/3")
     model_to_save = model.module if hasattr(model, "module") else model
     model_to_save.save_pretrained(output_dir)
+    logger.info("@@@@@@@@@@@@@@@@@@@@@@@ SAVE STEP 1/3")
     tokenizer.save_pretrained(output_dir)
+    logger.info("@@@@@@@@@@@@@@@@@@@@@@@ SAVE STEP 2/3")
     torch.save(args, os.path.join(output_dir, TRAINING_ARGS_NAME))
+    logger.info("@@@@@@@@@@@@@@@@@@@@@@@ SAVE STEP 3/3")
 
 
 def print_trainable_parameters(model):
@@ -672,11 +676,14 @@ def main():
         metrics["train_samples"] = max_train_samples
         logger.debug(f"Training metrics: {metrics}")
         trainer.log_metrics("train", metrics)
+        logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer log metrics done")
         trainer.save_metrics("train", metrics)
+        logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer save metrics done")
         trainer.save_state()
+        logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer save state done")
         logger.info(f"Saving model checkpoint to {training_args.output_dir}")
         save_model(training_args.output_dir, model, tokenizer, training_args)
-
+        logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer save model done")
     # Evaluation
     if training_args.do_eval:
         logger.info("*** Evaluate ***")
@@ -690,7 +697,9 @@ def main():
         metrics["perplexity"] = perplexity
         logger.debug(f"Eval metrics: {metrics}")
         trainer.log_metrics("eval", metrics)
+        logger.info("@@@@@@@@@@@@@@@@@@@@@@@ eval trainer log metrics done")
         trainer.save_metrics("eval", metrics)
+        logger.info("@@@@@@@@@@@@@@@@@@@@@@@ evaltrainer log metrics done")
 
 
 if __name__ == "__main__":
