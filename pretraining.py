@@ -289,7 +289,7 @@ class GroupTextsBuilder:
         return result
 
 
-class SavePeftModelTrainer(Trainer):
+class SavePeftModelTrainer_old(Trainer):
     """
     Trainer for lora models
     """
@@ -298,10 +298,30 @@ class SavePeftModelTrainer(Trainer):
         """Save the LoRA model."""
         logger.info("begin to save during SavePeftModelTrainer.traininig")
         os.makedirs(output_dir, exist_ok=True)
-        torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
-        logger.info("training args saved during  SavePeftModelTrainer.traininig")
         self.model.save_pretrained(output_dir)
         logger.info("model saved during  SavePeftModelTrainer.traininig")
+        #torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
+        torch.save(self.args, os.path.join(output_dir, "training_args.bin"))
+        logger.info("training args saved during  SavePeftModelTrainer.traininig")
+
+class SavePeftModelTrainer(Trainer):
+    print("save !!!!!!")
+    def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
+        """只保存adapter"""
+        logger.info("save 123 !!!!!!")
+        if output_dir is None:
+            output_dir = self.args.output_dir
+        self.model.save_pretrained(output_dir)
+        torch.save(self.args, os.path.join(output_dir, "training_args.bin"))
+        logger.info("save 123 done !!!!!!")
+
+    def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
+        """只保存adapter"""
+        print("save 123 !!!!!!")
+        if output_dir is None:
+            output_dir = self.args.output_dir
+        self.model.save_pretrained(output_dir)
+        torch.save(self.args, os.path.join(output_dir, "training_args.bin"))
 
 def save_model(output_dir, model, tokenizer, args):
     """Save the model and the tokenizer."""
@@ -314,7 +334,8 @@ def save_model(output_dir, model, tokenizer, args):
     logger.info("@@@@@@@@@@@@@@@@@@@@@@@ SAVE STEP 1/3")
     tokenizer.save_pretrained(output_dir)
     logger.info("@@@@@@@@@@@@@@@@@@@@@@@ SAVE STEP 2/3")
-    torch.save(args, os.path.join(output_dir, TRAINING_ARGS_NAME))
+    #torch.save(args, os.path.join(output_dir, TRAINING_ARGS_NAME))
+    torch.save(args, os.path.join(output_dir, "training_args.bin"E))
     logger.info("@@@@@@@@@@@@@@@@@@@@@@@ SAVE STEP 3/3")
 
 
