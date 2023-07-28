@@ -696,8 +696,10 @@ def main():
         checkpoint = None
         if training_args.resume_from_checkpoint is not None:
             checkpoint = training_args.resume_from_checkpoint
+        logger.info("train start")
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
-
+        logger.info("train end")
+        
         metrics = train_result.metrics
         metrics["train_samples"] = max_train_samples
         logger.debug(f"Training metrics: {metrics}")
