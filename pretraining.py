@@ -431,7 +431,7 @@ def main():
                                   quantization_config=q_config,
                                   cache_dir=model_args.cache_dir,
                                   torch_dtype=torch_dtype,
-                                  #device_map=model_args.device_map,
+                                  device_map=model_args.device_map,
                                   trust_remote_code=model_args.trust_remote_code,
                 
                                   # empty_init这是最关键的参数 如果不设置 那即使用deepspeed也oom
@@ -451,7 +451,7 @@ def main():
                                  load_in_8bit=model_args.load_in_8bit,
                                  cache_dir=model_args.cache_dir,
                                  torch_dtype=torch_dtype,
-                                 #device_map=model_args.device_map,
+                                 device_map=model_args.device_map,
                                  trust_remote_code=model_args.trust_remote_code,
                                  )
         if hasattr(model, 'lm_head'):
