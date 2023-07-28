@@ -477,8 +477,10 @@ def main():
                 lora_dropout=training_args.lora_dropout,
                 modules_to_save=modules_to_save)
             model = get_peft_model(model, peft_config)
-        if model_args.load_in_8bit:
-            model = prepare_model_for_int8_training(model)
+        ##if model_args.load_in_8bit:
+        ##    model = prepare_model_for_int8_training(model)
+        logger.info("prepare_model_for_kbit_training...")  ## add
+        model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True) ## add
         model.print_trainable_parameters()
     else:
         logger.info("Full parameters training")
@@ -686,6 +688,7 @@ def main():
         model.config.use_cache = False
     else:
         model.config.use_cache = True
+    model.gradient_checkpointing_enable()  ## add 20230728
     model.enable_input_require_grads()
     if not ddp and torch.cuda.device_count() > 1:
         # Keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
