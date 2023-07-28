@@ -40,8 +40,8 @@ from transformers import (
     Trainer,
     TrainingArguments,
     set_seed,
-    BitsAndBytesConfig,  ##20230725 ADD for alora
-    deepspeed,
+    BitsAndBytesConfig,  ##20230725 ADD for qlora
+    deepspeed,     ## add for deepspeed 
 )
 from transformers.deepspeed import is_deepspeed_zero3_enabled
 from transformers.trainer import TRAINING_ARGS_NAME
