@@ -301,7 +301,7 @@ class SavePeftModelTrainer_old(Trainer):
         self.model.save_pretrained(output_dir)
         logger.info("model saved during  SavePeftModelTrainer.traininig")
         #torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
-        torch.save(self.args, os.path.join(output_dir, "training_args.bin"))
+        ############torch.save(self.args, os.path.join(output_dir, "training_args.bin"))  老子把这行注释总行了吧
         logger.info("training args saved during  SavePeftModelTrainer.traininig")
 
 class SavePeftModelTrainer(Trainer):
