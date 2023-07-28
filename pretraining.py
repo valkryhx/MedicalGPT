@@ -44,6 +44,8 @@ from transformers import (
     TrainingArguments,
     is_torch_tpu_available,
     set_seed,
+    BitsAndBytesConfig,  ##20230728 ADD for qlora
+    deepspeed,           ##20230728 ADD for deepspeed
 )
 from transformers.trainer import TRAINING_ARGS_NAME
 from transformers.utils.versions import require_version
