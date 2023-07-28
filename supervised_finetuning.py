@@ -833,6 +833,7 @@ def main():
             low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
             device_map=model_args.device_map,
             trust_remote_code=model_args.trust_remote_code,
+            empty_init=False,
             quantization_config=BitsAndBytesConfig(
                 load_in_4bit=True,
                 bnb_4bit_use_double_quant=True,
