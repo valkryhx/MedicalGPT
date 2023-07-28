@@ -389,6 +389,7 @@ def main():
                                          )
             model = model_class.from_pretrained(
                                   model_args.model_name_or_path,
+                                  load_in_4bit=model_args.load_in_4bit,
                                   quantization_config=q_config,
                                   cache_dir=model_args.cache_dir,
                                   torch_dtype=torch_dtype,
