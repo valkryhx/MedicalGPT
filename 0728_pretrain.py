@@ -197,7 +197,7 @@ class PeftArguments(TrainingArguments):
     lora_alpha: Optional[float] = field(default=32.0)
     modules_to_save: Optional[str] = field(default=None)
     peft_path: Optional[str] = field(default=None)
-
+    qlora: bool = field(default=False, metadata={"help": "Whether to use qlora"})
 
 def accuracy(predictions, references, normalize=True, sample_weight=None):
     return {
@@ -339,6 +339,8 @@ def find_all_linear_names(peft_model, int4=False, int8=False):
             # last layer is not add to lora_module_names
             if 'lm_head' in name:
                 continue
+            if 'output_layer' in name:  ### chatglm2 use output_layer as the last layer name
+                contine
             names = name.split('.')
             lora_module_names.add(names[0] if len(names) == 1 else names[-1])
     return sorted(lora_module_names)
@@ -371,25 +373,41 @@ def main():
         )
         world_size = int(os.environ.get("WORLD_SIZE", 1))
         ddp = world_size != 1
-        if ddp:
+        if world_size > 1:
             model_args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
-
-        config = config_class.from_pretrained(
-            model_args.model_name_or_path,
-            torch_dtype=torch_dtype,
-            trust_remote_code=model_args.trust_remote_code,
-            cache_dir=model_args.cache_dir
-        )
-        model = model_class.from_pretrained(
-            model_args.model_name_or_path,
-            config=config,
-            load_in_8bit=model_args.load_in_8bit,
-            device_map=model_args.device_map,
-            trust_remote_code=model_args.trust_remote_code,
-        )
+        if training_args.qlora: # 启用qlora    ##########20230725 ADD
+            logger.info(f'training_args.qlora: {training_args.qlora}')
+            # Quantization
+            q_config = BitsAndBytesConfig(load_in_4bit=True,
+                                  bnb_4bit_quant_type='nf4',
+                                  bnb_4bit_use_double_quant=True,
+                                  bnb_4bit_compute_dtype=torch.float16 ,#_compute_dtype_map[model_args.compute_dtype]
+                                         )
+            model = model_class.from_pretrained(
+                                  model_args.model_name_or_path,
+                                  quantization_config=q_config,
+                                  cache_dir=model_args.cache_dir,
+                                  torch_dtype=torch_dtype,
+                                  device_map=model_args.device_map,
+                                  trust_remote_code=model_args.trust_remote_code,
+                                  #empty_init=False,   # https://github.com/THUDM/ChatGLM-6B/issues/530
+                                 )  
+        else :     
+            model = model_class.from_pretrained(
+                                 model_args.model_name_or_path,
+                                 load_in_8bit=model_args.load_in_8bit,
+                                 cache_dir=model_args.cache_dir,
+                                 torch_dtype=torch_dtype,
+                                 device_map=model_args.device_map,
+                                 trust_remote_code=model_args.trust_remote_code,
+                                 )
+        if hasattr(model, 'lm_head'):
+            model.lm_head = CastOutputToFloat(model.lm_head)
+        if hasattr(model, 'output_layer'):    ##########modify 20230725 chatglm2 最后一层是output_layer chatglm是lm_head
+            model.output_layer = CastOutputToFloat(model.output_layer)
     else:
-        raise ValueError(f"Error, model_name_or_path is None, Continue PT must be loaded from a pre-trained model")
-
+        raise ValueError(f"Error, model_name_or_path is None, SFT must be loaded from a pre-trained model")
+    logger.info(f'memory footprint of model: {model.get_memory_footprint()/(1024*1024*1024)} GB')
     tokenizer_kwargs = {
         "cache_dir": model_args.cache_dir,
         "use_fast": model_args.use_fast_tokenizer,
