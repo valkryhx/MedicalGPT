@@ -46,10 +46,13 @@ from transformers import (
 from transformers.deepspeed import is_deepspeed_zero3_enabled
 from transformers.trainer import TRAINING_ARGS_NAME
 from transformers.trainer_pt_utils import LabelSmoother
-
+from modeling_chatglm import ChatGLMForConditionalGeneration  ### addd
+from tokenization_chatglm import ChatGLMTokenizer  ### add
+from configuration_chatglm import ChatGLMConfig  ### add
 MODEL_CLASSES = {
     "bloom": (AutoConfig, BloomForCausalLM, BloomTokenizerFast),
-    "chatglm": (AutoConfig, AutoModel, AutoTokenizer),
+    #"chatglm": (AutoConfig, AutoModel, AutoTokenizer),
+    "chatglm": (ChatGLMConfig, ChatGLMForConditionalGeneration, ChatGLMTokenizer),
     "llama": (AutoConfig, LlamaForCausalLM, LlamaTokenizer),
     "baichuan": (AutoConfig, AutoModelForCausalLM, AutoTokenizer),
     "auto": (AutoConfig, AutoModelForCausalLM, AutoTokenizer),
