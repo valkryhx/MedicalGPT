@@ -294,7 +294,7 @@ class SavePeftModelTrainer_old(Trainer):
     Trainer for lora models
     """
 
-    def save_model(self, output_dir=None, _internal_call=False):
+    def save_model_old(self, output_dir=None, _internal_call=False):
         """Save the LoRA model."""
         logger.info("begin to save during SavePeftModelTrainer.traininig")
         os.makedirs(output_dir, exist_ok=True)
@@ -752,7 +752,8 @@ def main():
         trainer.save_state()
         logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer save state done")
         logger.info(f"Saving model checkpoint to {training_args.output_dir}")
-        save_model(training_args.output_dir, model, tokenizer, training_args)
+        #save_model(training_args.output_dir, model, tokenizer, training_args)
+        trainer.model.save_pretrained(training_args.output_dir)  ###add
         logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer save model done")
     # Evaluation
     if training_args.do_eval:
