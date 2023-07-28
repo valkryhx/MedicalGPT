@@ -479,7 +479,8 @@ def main():
                 r=training_args.lora_rank,
                 lora_alpha=training_args.lora_alpha,
                 lora_dropout=training_args.lora_dropout,
-                modules_to_save=modules_to_save)
+                #modules_to_save=modules_to_save
+            )
             model = get_peft_model(model, peft_config)
         ##if model_args.load_in_8bit:
         ##    model = prepare_model_for_int8_training(model)
