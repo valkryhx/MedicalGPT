@@ -296,10 +296,12 @@ class SavePeftModelTrainer(Trainer):
 
     def save_model(self, output_dir=None, _internal_call=False):
         """Save the LoRA model."""
+        logger.info("begin to save during SavePeftModelTrainer.traininig")
         os.makedirs(output_dir, exist_ok=True)
         torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
+        logger.info("training args saved during  SavePeftModelTrainer.traininig")
         self.model.save_pretrained(output_dir)
-
+        logger.info("model saved during  SavePeftModelTrainer.traininig")
 
 def save_model(output_dir, model, tokenizer, args):
     """Save the model and the tokenizer."""
