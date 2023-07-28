@@ -197,7 +197,7 @@ class PeftArguments(TrainingArguments):
     lora_alpha: Optional[float] = field(default=32.0)
     modules_to_save: Optional[str] = field(default=None)
     peft_path: Optional[str] = field(default=None)
-
+    qlora: bool = field(default=False, metadata={"help": "Whether to use qlora"})
 
 def accuracy(predictions, references, normalize=True, sample_weight=None):
     return {
