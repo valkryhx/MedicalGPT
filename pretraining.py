@@ -312,7 +312,8 @@ class SavePeftModelTrainer(Trainer):
         if output_dir is None:
             output_dir = self.args.output_dir
         self.model.save_pretrained(output_dir)
-        torch.save(self.args, os.path.join(output_dir, "training_args.bin"))
+        ############torch.save(self.args, os.path.join(output_dir, "training_args.bin"))  老子把这行注释总行了吧
+        logger.info("DO NOT SAVE THE FXXKING HUGE training args of deepspeed in SavePeftModelTrainer.traininig")
         logger.info("save 123 done !!!!!!")
 
 
