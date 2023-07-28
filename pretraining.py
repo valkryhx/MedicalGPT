@@ -315,13 +315,6 @@ class SavePeftModelTrainer(Trainer):
         torch.save(self.args, os.path.join(output_dir, "training_args.bin"))
         logger.info("save 123 done !!!!!!")
 
-    def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
-        """只保存adapter"""
-        print("save 123 !!!!!!")
-        if output_dir is None:
-            output_dir = self.args.output_dir
-        self.model.save_pretrained(output_dir)
-        torch.save(self.args, os.path.join(output_dir, "training_args.bin"))
 
 def save_model(output_dir, model, tokenizer, args):
     """Save the model and the tokenizer."""
