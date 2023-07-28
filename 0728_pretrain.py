@@ -462,6 +462,7 @@ def main():
         model.print_trainable_parameters()
     else:
         logger.info("Full parameters training")
+        model = model.float()
         print_trainable_parameters(model)
 
     # Preprocessing the datasets.
