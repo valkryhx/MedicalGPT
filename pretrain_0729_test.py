@@ -51,6 +51,144 @@ from transformers import (
 from transformers.trainer import TRAINING_ARGS_NAME
 from transformers.utils.versions import require_version
 
+@dataclass
+class ModelArguments:
+    """
+    Arguments pertaining to which model/config/tokenizer we are going to fine-tune, or train from scratch.
+    """
+
+    model_type: str = field(
+        default=None,
+        metadata={"help": "Model type selected in the list: " + ", ".join(MODEL_CLASSES.keys())}
+    )
+    model_name_or_path: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": (
+                "The model checkpoint for weights initialization.Don't set if you want to train a model from scratch."
+            )
+        },
+    )
+    tokenizer_name_or_path: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": (
+                "The tokenizer for weights initialization.Don't set if you want to train a model from scratch."
+            )
+        },
+    )
+    load_in_4bit: bool = field(default=False, metadata={"help": "Very important to play on kaggle!!!Whether to load the model in 4bit mode or not."})
+    load_in_8bit: bool = field(default=False, metadata={"help": "Whether to load the model in 8bit mode or not."})
+    cache_dir: Optional[str] = field(
+        default=None,
+        metadata={"help": "Where do you want to store the pretrained models downloaded from huggingface.co"},
+    )
+    use_fast_tokenizer: bool = field(
+        default=False,
+        metadata={"help": "Whether to use one of the fast tokenizer (backed by the tokenizers library) or not."},
+    )
+    torch_dtype: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": (
+                "Override the default `torch.dtype` and load the model under this dtype. If `auto` is passed, the "
+                "dtype will be automatically derived from the model's weights."
+            ),
+            "choices": ["auto", "bfloat16", "float16", "float32"],
+        },
+    )
+    device_map: Optional[str] = field(
+        default="auto",
+        metadata={"help": "Device to map model to. If `auto` is passed, the device will be selected automatically. "},
+    )
+    trust_remote_code: bool = field(
+        default=True,
+        metadata={"help": "Whether to trust remote code when loading a model from a remote checkpoint."},
+    )
+    local_rank: Optional[int] = field(
+        default=0,
+        metadata={"help": "只是为了接住从命令行中被deepspeed程序自动传来的local_rank值 "},
+    )
+    deepspeed: Optional[str] = field(
+        default="",
+        metadata={"help": "只是为了接住从命令行中传过来的ds config name "},
+    )
+
+    def __post_init__(self):
+        if self.model_type is None:
+            raise ValueError(
+                "You must specify a valid model_type to run training. Available model types are " + ", ".join(
+                    MODEL_CLASSES.keys()))
+        if self.model_name_or_path is None:
+            raise ValueError("You must specify a valid model_name_or_path to run training.")
+
+
+@dataclass
+class DataTrainingArguments:
+    """
+    Arguments pertaining to what data we are going to input our model for training and eval.
+    """
+
+    dataset_name: Optional[str] = field(
+        default=None, metadata={"help": "The name of the dataset to use (via the datasets library)."}
+    )
+    dataset_config_name: Optional[str] = field(
+        default=None, metadata={"help": "The configuration name of the dataset to use (via the datasets library)."}
+    )
+    train_file_dir: Optional[str] = field(default=None, metadata={"help": "The train text data file folder."})
+    validation_file_dir: Optional[str] = field(
+        default=None,
+        metadata={"help": "An optional input evaluation data file to evaluate the perplexity on text file folder."},
+    )
+    max_train_samples: Optional[int] = field(
+        default=None,
+        metadata={
+            "help": (
+                "For debugging purposes or quicker training, truncate the number of training examples to this "
+                "value if set."
+            )
+        },
+    )
+    max_eval_samples: Optional[int] = field(
+        default=None,
+        metadata={
+            "help": (
+                "For debugging purposes or quicker training, truncate the number of evaluation examples to this "
+                "value if set."
+            )
+        },
+    )
+    streaming: bool = field(default=False, metadata={"help": "Enable streaming mode"})
+    block_size: Optional[int] = field(
+        default=1024,
+        metadata={
+            "help": (
+                "Optional input sequence length after tokenization. "
+                "The training dataset will be truncated in block of this size for training. "
+                "Default to the model max input length for single sentence inputs (take into account special tokens)."
+            )
+        },
+    )
+    overwrite_cache: bool = field(
+        default=False, metadata={"help": "Overwrite the cached training and evaluation sets"}
+    )
+    validation_split_percentage: Optional[float] = field(
+        default=0.05,
+        metadata={
+            "help": "The percentage of the train set used as validation set in case there's no validation split"
+        },
+    )
+    preprocessing_num_workers: Optional[int] = field(
+        default=None,
+        metadata={"help": "The number of processes to use for the preprocessing."},
+    )
+    keep_linebreaks: bool = field(
+        default=True, metadata={"help": "Whether to keep line breaks when using TXT files or not."}
+    )
+
+    def __post_init__(self):
+        if self.streaming:
+            require_version("datasets>=2.0.0", "The streaming feature requires `datasets>=2.0.0`")
 
 
 @dataclass
@@ -204,14 +342,27 @@ def find_all_linear_names(model):   ## add 20230728
 
 
 def main():
-    #parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
-    #parser = HfArgumentParser((DataTrainingArguments, PeftArguments))
-    parser = HfArgumentParser((PeftArguments))
-    #parser = HfArgumentParser((TrainingArguments))
-    training_args , = parser.parse_json_file(json_file="luzi.json")
-    logger.info(f"从json获取的training ars,非最终版本 , training args={training_args}")
-    logger.info(f"TYPE_OF_training_args = {type(training_args)}")
-    #parser = argparse.ArgumentParser(description='DO NOT INCLUDE PARAM:SAVE_STEPS,OTHERWISE DEEPSPEED WILL SAVE HUGE INTERMEDIATE STATE!')
+
+
+    
+    parser = HfArgumentParser((ModelArguments, DataTrainingArguments))  ##add 
+    model_args, data_args = parser.parse_args_into_dataclasses()  ## modify training_args 不能来自命令行参数
+    training_args_parser =  HfArgumentParser(PeftArguments)  ## ADD 注意这是个tuple 虽然只有一个元素 但是要加逗号才能正常解析成PeftArguments
+    
+    training_args , = training_args_parser.parse_json_file(json_file="luzi.json")  ## ADD
+    if model_args.deepspeed and len(model_args.deepspeed.strip()) > 0 :
+        training_args.deepspeed = model_args.deepspeed  ##add 命令行传入的deepspeed参数先让model arg接住 再传给trainingargs
+    if model_args.local_rank :
+        training_args.local_rank = model_args.local_rank ## add  这个是deepspeed自动传入的 也是先让modelargs接住 再传给trainingargs
+    
+
+    ## 下面是正确的写法
+    
+    #parser = HfArgumentParser((PeftArguments))
+    #training_args , = parser.parse_json_file(json_file="luzi.json")
+    #logger.info(f"从json获取的training ars,非最终版本 , training args={training_args}")
+    #logger.info(f"TYPE_OF_training_args = {type(training_args)}")
+    ## 正确写法如上
     
     ## 用命令行输出的参数新值来覆盖从json文件中读取的旧值  注意！！！！ cmd_args不能包含save_steps参数 不然会让deepspeed也莫名的获取到这个参数 从而按照这个频次保存中间状态 很大的文件 基本是模型参数级别 很烦
     # training_args.qlora = True
