@@ -1,6 +1,4 @@
-{   "model_type": "chatglm",
-    "local_rank" :0 ,
-    "model_name_or_path" : "THUDM/chatglm2-6b" ,
+{   
     "output_dir" : "outputs-pt-0729-v1" ,
     "lr_scheduler_type": "cosine",
     "warmup_ratio": 0.1,
