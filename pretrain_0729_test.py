@@ -280,7 +280,12 @@ def main():
     #parser = HfArgumentParser((PeftArguments))
     parser = HfArgumentParser((TrainingArguments))
     training_args = parser.parse_args_into_dataclasses()
-
+    training_args.qlora = True
+    training_args.use_peft =True
+    training_args.target_modules = 'all'
+    training_args.lora_rank = 64 
+    training_args.lora_alpha = 16
+    training_args.lora_dropout =0.05
     #logger.warning(f"Model args: {model_args}")
     #logger.warning(f"Data args: {data_args}")
     logger.warning(f"Training args: {training_args}")
