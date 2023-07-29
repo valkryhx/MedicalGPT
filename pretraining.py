@@ -113,6 +113,14 @@ class ModelArguments:
         default=True,
         metadata={"help": "Whether to trust remote code when loading a model from a remote checkpoint."},
     )
+    local_rank: Optional[int] = field(
+        default=0,
+        metadata={"help": "只是为了接住从命令行中被deepspeed程序自动传来的local_rank值 "},
+    )
+    deepspeed: Optional[str] = field(
+        default="",
+        metadata={"help": "只是为了接住从命令行中传过来的ds config name "},
+    )
 
     def __post_init__(self):
         if self.model_type is None:
@@ -389,10 +397,12 @@ def find_all_linear_names_old(peft_model, int4=False, int8=False):
 
 def main():
     #parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments)) ## modify
-    parser = HfArgumentParser((ModelArguments, DataTrainingArguments,TrainingArguments))  ##add 
+    parser = HfArgumentParser((ModelArguments, DataTrainingArguments))  ##add 
     model_args, data_args, _ = parser.parse_args_into_dataclasses()  ## modify training_args 不能来自命令行参数
     training_args_parser =  HfArgumentParser(PeftArguments)  ## ADD 注意这是个tuple 虽然只有一个元素 但是要加逗号才能正常解析成PeftArguments
     training_args , = training_args_parser.parse_json_file(json_file="luzi.json")  ## ADD
+    training_args.deepspeed = model_args.deepspeed  ##add 命令行传入的deepspeed参数先让model arg接住 再传给trainingargs
+    training_args.local_rank = model_args.local_rank ## add  这个是deepspeed自动传入的 也是先让modelargs接住 再传给trainingargs
     logger.warning(f"Model args: {model_args}")
     logger.warning(f"Data args: {data_args}")
     logger.warning(f"Training args: {training_args}")
