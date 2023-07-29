@@ -658,6 +658,8 @@ def main():
 
     ##add 20230717 modify 20230729 这样的话 不在命令行中传入save_steps参数 看看deepspeed会不会继续保存中间的state ckpt 
     ## 也确保了load_best_model_at_end 要求的eval_steps = save_steps
+    training_args.evaluation_strategy = "steps"
+    training_args.eval_steps =  10
     training_args.load_best_model_at_end=True
     training_args.save_stategy ="steps"
     training_args.save_steps = training_args.eval_steps
