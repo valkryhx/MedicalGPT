@@ -61,6 +61,26 @@ PROMPT_TEMPLATE = (
 )
 
 
+"""
+下面的class ModelArguments/DataTrainingArguments/PeftArguments 分别定义了三类参数
+分别用于对模型的初始化 对参与训练和评估的数据集的配置 以及对peft模型的配置
+注意class PeftArguments(TrainingArguments) 说明PeftArguments是继承TrainingArguments类的 最后传给Train中args参数 也是PeftArguments(TrainingArguments)类的对象
+可以从下面的代码看出 
+def main():
+    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
+    model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+parser中最后一个对象对应PeftArguments， 赋值给了training_args 而training_args中由继承而来 包含了很多https://huggingface.co/transformers/v3.0.2/main_classes/trainer.html#transformers.TrainingArguments
+定义的参数 比如per_device_train_batch_size/per_device_eval_batch_size  最后Trainer中也是将training_args 传入 作为真正的训练args，见533行附近
+trainer = SavePeftModelTrainer(
+        model=model,
+        args=training_args, ##这里
+
+
+
+"""
+
+
+
 @dataclass
 class ModelArguments:
     """
