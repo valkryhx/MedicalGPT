@@ -319,11 +319,13 @@ class SavePeftModelTrainer(Trainer):  ### from its sft.py
     """
 
     def save_model(self, output_dir=None, _internal_call=False):
-        """Save the LoRA model."""
+        logger.info("""Save the LoRA model.""")
         os.makedirs(output_dir, exist_ok=True)
         if self.args.local_rank in [-1, 0]:
-            torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
             self.model.save_pretrained(output_dir)
+            torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
+            logger.info("""the LoRA model saved """)
+            
 
 
 def save_model(output_dir, model, tokenizer, args):  #from its sft.py
@@ -400,9 +402,12 @@ def main():
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments))  ##add 
     model_args, data_args = parser.parse_args_into_dataclasses()  ## modify training_args 不能来自命令行参数
     training_args_parser =  HfArgumentParser(PeftArguments)  ## ADD 注意这是个tuple 虽然只有一个元素 但是要加逗号才能正常解析成PeftArguments
+    
     training_args , = training_args_parser.parse_json_file(json_file="luzi.json")  ## ADD
-    training_args.deepspeed = model_args.deepspeed  ##add 命令行传入的deepspeed参数先让model arg接住 再传给trainingargs
-    training_args.local_rank = model_args.local_rank ## add  这个是deepspeed自动传入的 也是先让modelargs接住 再传给trainingargs
+    if model_args.deepspeed and len(model_args.deepspeed.strip()) > 0 :
+        training_args.deepspeed = model_args.deepspeed  ##add 命令行传入的deepspeed参数先让model arg接住 再传给trainingargs
+    if model_args.local_rank :
+        training_args.local_rank = model_args.local_rank ## add  这个是deepspeed自动传入的 也是先让modelargs接住 再传给trainingargs
     logger.warning(f"Model args: {model_args}")
     logger.warning(f"Data args: {data_args}")
     logger.warning(f"Training args: {training_args}")
