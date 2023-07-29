@@ -7,7 +7,7 @@
     "save_steps": 10,
     "evaluation_strategy": "steps",
     "eval_steps": 10,
-    "optim": "adamw_torch",
+    "optim": "paged_adamw_8bit",
     "fp16": true,
     "remove_unused_columns": false,
     "ddp_find_unused_parameters": false,
