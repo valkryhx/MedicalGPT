@@ -370,14 +370,14 @@ def find_all_linear_names(peft_model, int4=False, int8=False):
 
 def main():
     #modify 20230729
-    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
-    model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+    #parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
+    #model_args, data_args, training_args = parser.parse_args_into_dataclasses()
 
     ## add 20230729 只要modelArg和DatasetArg 单独从json中读取trainArg
-    #parser = HfArgumentParser((ModelArguments, DataTrainingArguments))
-    #model_args, data_args = parser.parse_args_into_dataclasses()
+    parser = HfArgumentParser((ModelArguments, DataTrainingArguments))
+    model_args, data_args = parser.parse_args_into_dataclasses()
 
-    #training_args, = parser.parse_json_file(json_file="traing_params.json")
+    training_args, = parser.parse_json_file(json_file="traing_params.json")
     ## add end
     
     logger.warning(f"Model args: {model_args}")
