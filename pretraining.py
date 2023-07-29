@@ -134,6 +134,15 @@ class ModelArguments:
         metadata={"help": "Whether to trust remote code when loading a model from a remote checkpoint."},
     )
 
+    local_rank: Optional[int] = field(   ## add 0730
+        default=0,
+        metadata={"help": "只是为了接住从命令行中被deepspeed程序自动传来的local_rank值 "},
+    )
+    deepspeed: Optional[str] = field(
+        default="",
+        metadata={"help": "只是为了接住从命令行中传过来的ds config name "},
+    )
+
     def __post_init__(self):
         if self.model_type is None:
             raise ValueError(
