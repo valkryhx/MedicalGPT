@@ -1,0 +1,4 @@
+1. luzi.json 不能出现deepspeed参数项
+2.model_args  dataset_args 两个成一个HfAruments.from dataclass
+3. TraingArgs 单独成一个HfArguments 一定从 parse from json 来 也就是luzi
+4. model args 中可以将deepspeed 和local rank 先存着 然后赋值给trainingargs
