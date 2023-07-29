@@ -402,7 +402,7 @@ def main():
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
 
-    logger.warning(f"Model args: {model_args}")
+    #logger.warning(f"Model args: {model_args}")
     logger.warning(f"Data args: {data_args}")
     logger.warning(f"Training args: {training_args}")
     logger.warning(
@@ -414,20 +414,20 @@ def main():
     set_seed(training_args.seed)
 
     # Load pretrained model and tokenizer
-    if not model_args.model_type:
-        raise ValueError("Please specify a model_type, e.g. llama, chatglm, bloom, etc.")
-    config_class, model_class, tokenizer_class = MODEL_CLASSES[model_args.model_type]
-    if model_args.model_type and model_args.model_name_or_path:
-        torch_dtype = (
-            model_args.torch_dtype
-            if model_args.torch_dtype in ["auto", None]
-            else getattr(torch, model_args.torch_dtype)
-        )
+    # if not model_args.model_type:
+    #     raise ValueError("Please specify a model_type, e.g. llama, chatglm, bloom, etc.")
+    # config_class, model_class, tokenizer_class = MODEL_CLASSES[model_args.model_type]
+    # if model_args.model_type and model_args.model_name_or_path:
+    #     torch_dtype = (
+    #         model_args.torch_dtype
+    #         if model_args.torch_dtype in ["auto", None]
+    #         else getattr(torch, model_args.torch_dtype)
+    #     )
         world_size = int(os.environ.get("WORLD_SIZE", 1))
         ddp = world_size != 1
         logger.info(f"world_size={world_size} , ddp={ddp}")
-        if world_size > 1:
-            model_args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
+        # if world_size > 1:
+        #     model_args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
         if training_args.qlora: # 启用qlora    ##########20230725 ADD
             logger.info(f'training_args.qlora: {training_args.qlora}')
             # Quantization
@@ -437,13 +437,13 @@ def main():
                                   bnb_4bit_compute_dtype=torch.float16 ,#_compute_dtype_map[model_args.compute_dtype]
                                          )
             model = model_class.from_pretrained(
-                                  model_args.model_name_or_path,
-                                  load_in_4bit=model_args.load_in_4bit,
+                                  "THUDM/chatglm2-6b",#model_args.model_name_or_path,
+                                  load_in_4bit=False,#model_args.load_in_4bit,
                                   quantization_config=q_config,
-                                  cache_dir=model_args.cache_dir,
+                                  #cache_dir=model_args.cache_dir,
                                   torch_dtype=torch_dtype,
-                                  device_map=model_args.device_map,
-                                  trust_remote_code=model_args.trust_remote_code,
+                                  #device_map=model_args.device_map,
+                                  trust_remote_code=True,#model_args.trust_remote_code,
                 
                                   # empty_init这是最关键的参数 如果不设置 那即使用deepspeed也oom
                                   # 当您使用 AutoModel.from_pretrained() 方法加载预训练模型时，模型权重会被存储在 PyTorch 的 nn.Parameter 对象中。
@@ -458,12 +458,12 @@ def main():
                                  )  
         else :     
             model = model_class.from_pretrained(
-                                 model_args.model_name_or_path,
-                                 load_in_8bit=model_args.load_in_8bit,
-                                 cache_dir=model_args.cache_dir,
+                                 "THUDM/chatglm2-6b", #model_args.model_name_or_path,
+                                 load_in_8bit=False,#model_args.load_in_8bit,
+                                 #cache_dir=model_args.cache_dir,
                                  torch_dtype=torch_dtype,
-                                 device_map=model_args.device_map,
-                                 trust_remote_code=model_args.trust_remote_code,
+                                 #device_map=model_args.device_map,
+                                 trust_remote_code=True, #model_args.trust_remote_code,
                                  )
         if hasattr(model, 'lm_head'):
             model.lm_head = CastOutputToFloat(model.lm_head)
@@ -473,14 +473,14 @@ def main():
         raise ValueError(f"Error, model_name_or_path is None, SFT must be loaded from a pre-trained model")
     logger.info(f'memory footprint of model: {model.get_memory_footprint()/(1024*1024*1024)} GB')
     # Load tokenizer
-    tokenizer_kwargs = {
-        "cache_dir": model_args.cache_dir,
-        "use_fast": model_args.use_fast_tokenizer,
-        "trust_remote_code": model_args.trust_remote_code,
-    }
-    tokenizer_name_or_path = model_args.tokenizer_name_or_path
+    # tokenizer_kwargs = {
+    #     "cache_dir": model_args.cache_dir,
+    #     "use_fast": model_args.use_fast_tokenizer,
+    #     "trust_remote_code": model_args.trust_remote_code,
+    # }
+    tokenizer_name_or_path = "THUDM/chatglm2-6b" #model_args.tokenizer_name_or_path
     if not tokenizer_name_or_path:
-        tokenizer_name_or_path = model_args.model_name_or_path
+        tokenizer_name_or_path = "THUDM/chatglm2-6b" #model_args.model_name_or_path
     tokenizer = tokenizer_class.from_pretrained(tokenizer_name_or_path, **tokenizer_kwargs)
 
     if training_args.use_peft:
@@ -491,7 +491,7 @@ def main():
             logger.info("Init new peft model")
             target_modules = training_args.target_modules.split(',') if training_args.target_modules else None
             if target_modules and 'all' in target_modules:
-                ##target_modules = find_all_linear_names(model, int4=False, int8=model_args.load_in_8bit)
+                ##target_modules = find_all_linear_names(model, int4=False, int8=False)
                 target_modules = find_all_linear_names(model)
             modules_to_save = training_args.modules_to_save
             if modules_to_save is not None:
@@ -717,31 +717,10 @@ def main():
         logger.debug("Tokenized eval example:")
         logger.debug(tokenizer.decode(eval_dataset[0]['input_ids']))
 
-    # Initialize our Trainer
-    # if training_args.gradient_checkpointing:
-    #     model.gradient_checkpointing_enable()
-    #     model.config.use_cache = False
-    # else:
-    #     model.config.use_cache = True
+   
     model.gradient_checkpointing_enable()  ## add 20230728
     model.enable_input_require_grads()
-    # if not ddp and torch.cuda.device_count() > 1:
-    #     # Keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
-    #     model.is_parallelizable = True
-    #     model.model_parallel = True
-
-    # trainer = SavePeftModelTrainer(
-    #     model=model,
-    #     args=training_args,
-    #     train_dataset=train_dataset if training_args.do_train else None,
-    #     eval_dataset=eval_dataset if training_args.do_eval else None,
-    #     tokenizer=tokenizer,
-    #     data_collator=fault_tolerance_data_collator,
-    #     compute_metrics=compute_metrics if training_args.do_eval and not is_torch_tpu_available() else None,
-    #     preprocess_logits_for_metrics=preprocess_logits_for_metrics
-    #     if training_args.do_eval and not is_torch_tpu_available()
-    #     else None,
-    # )
+  
 
     trainer = LoRATrainer(
         model=model,
@@ -757,46 +736,7 @@ def main():
 
     logger.info("到这里了 1111111111111\n11111111111111\n11111111111111\n111111111111   ")
     trainer.train()
-    # # Training
-    # if training_args.do_train:
-    #     logger.info("*** Train ***")
-    #     logger.debug(f"Train dataloader example: {next(iter(trainer.get_train_dataloader()))}")
-    #     checkpoint = None
-    #     if training_args.resume_from_checkpoint is not None:
-    #         checkpoint = training_args.resume_from_checkpoint
-    #     logger.info("train start")
-    #     train_result = trainer.train(resume_from_checkpoint=checkpoint)
-    #     logger.info("train end")
-        
-    #     metrics = train_result.metrics
-    #     metrics["train_samples"] = max_train_samples
-    #     logger.debug(f"Training metrics: {metrics}")
-    #     trainer.log_metrics("train", metrics)
-    #     logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer log metrics done")
-    #     trainer.save_metrics("train", metrics)
-    #     logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer save metrics done")
-    #     trainer.save_state()
-    #     logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer save state done")
-    #     logger.info(f"Saving model checkpoint to {training_args.output_dir}")
-    #     #save_model(training_args.output_dir, model, tokenizer, training_args)
-    #     trainer.model.save_pretrained(training_args.output_dir)  ###add
-    #     logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer save model done")
-    # # Evaluation
-    # if training_args.do_eval:
-    #     logger.info("*** Evaluate ***")
-    #     metrics = trainer.evaluate()
-
-    #     metrics["eval_samples"] = max_eval_samples
-    #     try:
-    #         perplexity = math.exp(metrics["eval_loss"])
-    #     except OverflowError:
-    #         perplexity = float("inf")
-    #     metrics["perplexity"] = perplexity
-    #     logger.debug(f"Eval metrics: {metrics}")
-    #     trainer.log_metrics("eval", metrics)
-    #     logger.info("@@@@@@@@@@@@@@@@@@@@@@@ eval trainer log metrics done")
-    #     trainer.save_metrics("eval", metrics)
-    #     logger.info("@@@@@@@@@@@@@@@@@@@@@@@ evaltrainer log metrics done")
+    
 
 
 if __name__ == "__main__":
