@@ -290,34 +290,34 @@ class GroupTextsBuilder:
         return result
 
 
-class SavePeftModelTrainer_old(Trainer):
-    """
-    Trainer for lora models
-    """
+# class SavePeftModelTrainer_old(Trainer):
+#     """
+#     Trainer for lora models
+#     """
 
-    def save_model_old(self, output_dir=None, _internal_call=False):
-        """Save the LoRA model."""
-        logger.info("begin to save during SavePeftModelTrainer.traininig")
-        os.makedirs(output_dir, exist_ok=True)
-        self.model.save_pretrained(output_dir)
-        logger.info("model saved during  SavePeftModelTrainer.traininig")
-        #torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
-        ############torch.save(self.args, os.path.join(output_dir, "training_args.bin"))  老子把这行注释总行了吧
-        logger.info("DO NOT SAVE THE FXXKING HUGE training args of deepspeed in SavePeftModelTrainer.traininig")
+#     def save_model_old(self, output_dir=None, _internal_call=False):
+#         """Save the LoRA model."""
+#         logger.info("begin to save during SavePeftModelTrainer.traininig")
+#         os.makedirs(output_dir, exist_ok=True)
+#         self.model.save_pretrained(output_dir)
+#         logger.info("model saved during  SavePeftModelTrainer.traininig")
+#         #torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
+#         ############torch.save(self.args, os.path.join(output_dir, "training_args.bin"))  老子把这行注释总行了吧
+#         logger.info("DO NOT SAVE THE FXXKING HUGE training args of deepspeed in SavePeftModelTrainer.traininig")
 
-class SavePeftModelTrainer(Trainer):  ### from its sft.py
-    """
-    Trainer for lora models
-    """
+# class SavePeftModelTrainer(Trainer):  ### from its sft.py
+#     """
+#     Trainer for lora models
+#     """
 
-    def save_model(self, output_dir=None, _internal_call=False):
-        """Save the LoRA model."""
-        os.makedirs(output_dir, exist_ok=True)
-        if self.args.local_rank in [-1, 0]:   ##　只在主进程中保存　也就local_rank =0  process保存
-            torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
-            self.model.save_pretrained(output_dir)
+#     def save_model(self, output_dir=None, _internal_call=False):
+#         """Save the LoRA model."""
+#         os.makedirs(output_dir, exist_ok=True)
+#         if self.args.local_rank in [-1, 0]:   ##　只在主进程中保存　也就local_rank =0  process保存
+#             torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
+#             self.model.save_pretrained(output_dir)
 
-
+## new
 class LoRATrainer(Trainer):
     print("save !!!!!!")
     def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
@@ -329,16 +329,16 @@ class LoRATrainer(Trainer):
             self.model.save_pretrained(output_dir)
             torch.save(self.args, os.path.join(output_dir, "training_args.bin"))
 
-def save_model(output_dir, model, tokenizer, args):  from its sft.py
-    """Save the model and the tokenizer."""
-    os.makedirs(output_dir, exist_ok=True)
+# def save_model(output_dir, model, tokenizer, args):  from its sft.py
+#     """Save the model and the tokenizer."""
+#     os.makedirs(output_dir, exist_ok=True)
 
-    # Take care of distributed/parallel training
-    model_to_save = model.module if hasattr(model, "module") else model
-    if args.local_rank in [-1, 0]:
-        model_to_save.save_pretrained(output_dir)
-        tokenizer.save_pretrained(output_dir)
-        torch.save(args, os.path.join(output_dir, TRAINING_ARGS_NAME))
+#     # Take care of distributed/parallel training
+#     model_to_save = model.module if hasattr(model, "module") else model
+#     if args.local_rank in [-1, 0]:
+#         model_to_save.save_pretrained(output_dir)
+#         tokenizer.save_pretrained(output_dir)
+#         torch.save(args, os.path.join(output_dir, TRAINING_ARGS_NAME))
 
 
 
@@ -358,7 +358,7 @@ def print_trainable_parameters(model):
         f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
     )
 
-
+## new
 def find_all_linear_names(model):   ## add 20230728
     """
     找出所有全连接层，为所有全连接添加adapter
@@ -377,25 +377,25 @@ def find_all_linear_names(model):   ## add 20230728
     return list(lora_module_names)
 
 
-def find_all_linear_names_old(peft_model, int4=False, int8=False):
-    """Find all linear layer names in the model. reference from qlora paper."""
-    cls = torch.nn.Linear
-    if int4 or int8:
-        if int4:
-            cls = bnb.nn.Linear4bit
-        elif int8:
-            cls = bnb.nn.Linear8bitLt
-    lora_module_names = set()
-    for name, module in peft_model.named_modules():
-        if isinstance(module, cls):
-            # last layer is not add to lora_module_names
-            if 'lm_head' in name:
-                continue
-            if 'output_layer' in name :
-                continue
-            names = name.split('.')
-            lora_module_names.add(names[0] if len(names) == 1 else names[-1])
-    return sorted(lora_module_names)
+# def find_all_linear_names_old(peft_model, int4=False, int8=False):
+#     """Find all linear layer names in the model. reference from qlora paper."""
+#     cls = torch.nn.Linear
+#     if int4 or int8:
+#         if int4:
+#             cls = bnb.nn.Linear4bit
+#         elif int8:
+#             cls = bnb.nn.Linear8bitLt
+#     lora_module_names = set()
+#     for name, module in peft_model.named_modules():
+#         if isinstance(module, cls):
+#             # last layer is not add to lora_module_names
+#             if 'lm_head' in name:
+#                 continue
+#             if 'output_layer' in name :
+#                 continue
+#             names = name.split('.')
+#             lora_module_names.add(names[0] if len(names) == 1 else names[-1])
+#     return sorted(lora_module_names)
 
 
 def main():
@@ -718,17 +718,17 @@ def main():
         logger.debug(tokenizer.decode(eval_dataset[0]['input_ids']))
 
     # Initialize our Trainer
-    if training_args.gradient_checkpointing:
-        model.gradient_checkpointing_enable()
-        model.config.use_cache = False
-    else:
-        model.config.use_cache = True
+    # if training_args.gradient_checkpointing:
+    #     model.gradient_checkpointing_enable()
+    #     model.config.use_cache = False
+    # else:
+    #     model.config.use_cache = True
     model.gradient_checkpointing_enable()  ## add 20230728
     model.enable_input_require_grads()
-    if not ddp and torch.cuda.device_count() > 1:
-        # Keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
-        model.is_parallelizable = True
-        model.model_parallel = True
+    # if not ddp and torch.cuda.device_count() > 1:
+    #     # Keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
+    #     model.is_parallelizable = True
+    #     model.model_parallel = True
 
     # trainer = SavePeftModelTrainer(
     #     model=model,
@@ -755,46 +755,48 @@ def main():
         else None,
     )
 
-    # Training
-    if training_args.do_train:
-        logger.info("*** Train ***")
-        logger.debug(f"Train dataloader example: {next(iter(trainer.get_train_dataloader()))}")
-        checkpoint = None
-        if training_args.resume_from_checkpoint is not None:
-            checkpoint = training_args.resume_from_checkpoint
-        logger.info("train start")
-        train_result = trainer.train(resume_from_checkpoint=checkpoint)
-        logger.info("train end")
+    logger.info("到这里了 1111111111111\n11111111111111\n11111111111111\n111111111111   ")
+    trainer.train()
+    # # Training
+    # if training_args.do_train:
+    #     logger.info("*** Train ***")
+    #     logger.debug(f"Train dataloader example: {next(iter(trainer.get_train_dataloader()))}")
+    #     checkpoint = None
+    #     if training_args.resume_from_checkpoint is not None:
+    #         checkpoint = training_args.resume_from_checkpoint
+    #     logger.info("train start")
+    #     train_result = trainer.train(resume_from_checkpoint=checkpoint)
+    #     logger.info("train end")
         
-        metrics = train_result.metrics
-        metrics["train_samples"] = max_train_samples
-        logger.debug(f"Training metrics: {metrics}")
-        trainer.log_metrics("train", metrics)
-        logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer log metrics done")
-        trainer.save_metrics("train", metrics)
-        logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer save metrics done")
-        trainer.save_state()
-        logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer save state done")
-        logger.info(f"Saving model checkpoint to {training_args.output_dir}")
-        #save_model(training_args.output_dir, model, tokenizer, training_args)
-        trainer.model.save_pretrained(training_args.output_dir)  ###add
-        logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer save model done")
-    # Evaluation
-    if training_args.do_eval:
-        logger.info("*** Evaluate ***")
-        metrics = trainer.evaluate()
+    #     metrics = train_result.metrics
+    #     metrics["train_samples"] = max_train_samples
+    #     logger.debug(f"Training metrics: {metrics}")
+    #     trainer.log_metrics("train", metrics)
+    #     logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer log metrics done")
+    #     trainer.save_metrics("train", metrics)
+    #     logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer save metrics done")
+    #     trainer.save_state()
+    #     logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer save state done")
+    #     logger.info(f"Saving model checkpoint to {training_args.output_dir}")
+    #     #save_model(training_args.output_dir, model, tokenizer, training_args)
+    #     trainer.model.save_pretrained(training_args.output_dir)  ###add
+    #     logger.info("@@@@@@@@@@@@@@@@@@@@@@@trainer save model done")
+    # # Evaluation
+    # if training_args.do_eval:
+    #     logger.info("*** Evaluate ***")
+    #     metrics = trainer.evaluate()
 
-        metrics["eval_samples"] = max_eval_samples
-        try:
-            perplexity = math.exp(metrics["eval_loss"])
-        except OverflowError:
-            perplexity = float("inf")
-        metrics["perplexity"] = perplexity
-        logger.debug(f"Eval metrics: {metrics}")
-        trainer.log_metrics("eval", metrics)
-        logger.info("@@@@@@@@@@@@@@@@@@@@@@@ eval trainer log metrics done")
-        trainer.save_metrics("eval", metrics)
-        logger.info("@@@@@@@@@@@@@@@@@@@@@@@ evaltrainer log metrics done")
+    #     metrics["eval_samples"] = max_eval_samples
+    #     try:
+    #         perplexity = math.exp(metrics["eval_loss"])
+    #     except OverflowError:
+    #         perplexity = float("inf")
+    #     metrics["perplexity"] = perplexity
+    #     logger.debug(f"Eval metrics: {metrics}")
+    #     trainer.log_metrics("eval", metrics)
+    #     logger.info("@@@@@@@@@@@@@@@@@@@@@@@ eval trainer log metrics done")
+    #     trainer.save_metrics("eval", metrics)
+    #     logger.info("@@@@@@@@@@@@@@@@@@@@@@@ evaltrainer log metrics done")
 
 
 if __name__ == "__main__":
