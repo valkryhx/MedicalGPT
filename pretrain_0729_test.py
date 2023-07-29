@@ -232,7 +232,7 @@ def main():
                       type=int,
                       default=16)
     parser.add_argument('--lora_dropout',
-                      type=int,
+                      type=float,
                       default=0.05)
     parser.add_argument('--overwrite_output_dir',
                       type=eval, 
