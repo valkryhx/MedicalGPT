@@ -204,7 +204,8 @@ class PeftArguments(TrainingArguments):
     modules_to_save: Optional[str] = field(default=None)
     peft_path: Optional[str] = field(default=None, metadata={"help": "The path to the peft model"})
     qlora: bool = field(default=False, metadata={"help": "Whether to use qlora"})
-    deepseed:str = field(default="ds_zero2_config.json" , metadata={"help":"ds config file path"})
+    """下面的没必要加  使用--deepspeed 自动会在PeftArguments(TrainingArguments) 中加入deepspeed参数"""
+    #deepspeed:str = field(default="ds_zero2_config.json" , metadata={"help":"ds config file path"})
 
 class CastOutputToFloat(torch.nn.Sequential):
     """Cast the output of the model to float"""
