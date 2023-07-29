@@ -374,8 +374,8 @@ def main():
     #model_args, data_args, training_args = parser.parse_args_into_dataclasses()
 
     ## add 20230729 只要modelArg和DatasetArg 单独从json中读取trainArg
-    parser = HfArgumentParser((ModelArguments, DataTrainingArguments))
-    model_args, data_args = parser.parse_args_into_dataclasses()
+    parser = HfArgumentParser((ModelArguments, DataTrainingArguments,PeftArguments))
+    model_args, data_args ,_ = parser.parse_args_into_dataclasses()
 
     training_args, = parser.parse_json_file(json_file="traing_params.json")
     ## add end
