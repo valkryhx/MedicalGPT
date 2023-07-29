@@ -424,6 +424,7 @@ def main():
     #         if model_args.torch_dtype in ["auto", None]
     #         else getattr(torch, model_args.torch_dtype)
     #     )
+    if True :
         world_size = int(os.environ.get("WORLD_SIZE", 1))
         ddp = world_size != 1
         logger.info(f"world_size={world_size} , ddp={ddp}")
