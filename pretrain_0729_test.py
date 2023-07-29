@@ -357,8 +357,8 @@ def main():
     #parser = HfArgumentParser((ModelArguments, DataTrainingArguments))  ##add 
     #model_args, data_args = parser.parse_args_into_dataclasses()  ## modify training_args 不能来自命令行参数
     #del parser
-    training_args_parser =  HfArgumentParser(PeftArguments)  ## ADD 注意这是个tuple 虽然只有一个元素 但是要加逗号才能正常解析成PeftArguments
-    training_args , = training_args_parser.parse_json_file(json_file="luzi.json")  ## ADD
+    #training_args_parser =  HfArgumentParser(PeftArguments)  ## ADD 注意这是个tuple 虽然只有一个元素 但是要加逗号才能正常解析成PeftArguments
+    #training_args , = training_args_parser.parse_json_file(json_file="luzi.json")  ## ADD
     #if model_args.deepspeed and len(model_args.deepspeed.strip()) > 0 :
     #    training_args.deepspeed = model_args.deepspeed  ##add 命令行传入的deepspeed参数先让model arg接住 再传给trainingargs
     #if model_args.local_rank :
@@ -367,10 +367,10 @@ def main():
 
     ## 下面是正确的写法
     
-    #parser = HfArgumentParser((PeftArguments))
-    #training_args , = parser.parse_json_file(json_file="luzi.json")
-    #logger.info(f"从json获取的training ars,非最终版本 , training args={training_args}")
-    #logger.info(f"TYPE_OF_training_args = {type(training_args)}")
+    parser = HfArgumentParser((PeftArguments))
+    training_args , = parser.parse_json_file(json_file="luzi.json")
+    logger.info(f"从json获取的training ars,非最终版本 , training args={training_args}")
+    logger.info(f"TYPE_OF_training_args = {type(training_args)}")
     ## 正确写法如上
     
     ## 用命令行输出的参数新值来覆盖从json文件中读取的旧值  注意！！！！ cmd_args不能包含save_steps参数 不然会让deepspeed也莫名的获取到这个参数 从而按照这个频次保存中间状态 很大的文件 基本是模型参数级别 很烦
