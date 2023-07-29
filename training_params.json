@@ -1,5 +1,5 @@
 {
-    "--output_dir" : "outputs-pt-0729-v1" ,
+    "output_dir" : "outputs-pt-0729-v1" ,
     "lr_scheduler_type": "cosine",
     "warmup_ratio": 0.1,
     "logging_steps": 10,
