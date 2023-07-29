@@ -355,9 +355,9 @@ def main():
 
     
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments))  ##add 
-    model_args, data_args = parser.parse_args_into_dataclasses()  ## modify training_args 不能来自命令行参数
+    #model_args, data_args = parser.parse_args_into_dataclasses()  ## modify training_args 不能来自命令行参数
+    del parser
     training_args_parser =  HfArgumentParser(PeftArguments)  ## ADD 注意这是个tuple 虽然只有一个元素 但是要加逗号才能正常解析成PeftArguments
-    
     training_args , = training_args_parser.parse_json_file(json_file="luzi.json")  ## ADD
     #if model_args.deepspeed and len(model_args.deepspeed.strip()) > 0 :
     #    training_args.deepspeed = model_args.deepspeed  ##add 命令行传入的deepspeed参数先让model arg接住 再传给trainingargs
