@@ -51,6 +51,17 @@ from transformers import (
 from transformers.trainer import TRAINING_ARGS_NAME
 from transformers.utils.versions import require_version
 
+
+
+MODEL_CLASSES = {
+    "bloom": (BloomForCausalLM, BloomTokenizerFast),
+    "chatglm": (AutoModel, AutoTokenizer),
+    "llama": (LlamaForCausalLM, LlamaTokenizer),
+    "baichuan": (AutoModelForCausalLM, AutoTokenizer),
+    "auto": (AutoModelForCausalLM, AutoTokenizer),
+}
+
+
 @dataclass
 class ModelArguments:
     """
