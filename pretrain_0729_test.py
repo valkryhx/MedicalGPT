@@ -277,7 +277,8 @@ def find_all_linear_names(model):   ## add 20230728
 def main():
     #parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
     #parser = HfArgumentParser((DataTrainingArguments, PeftArguments))
-    parser = HfArgumentParser((PeftArguments))
+    #parser = HfArgumentParser((PeftArguments))
+    parser = HfArgumentParser((TrainingArguments))
     training_args = parser.parse_args_into_dataclasses()
 
     #logger.warning(f"Model args: {model_args}")
