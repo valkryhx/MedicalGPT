@@ -1,4 +1,6 @@
 {
+    "do_train":true,
+    "do_eval":true,
     "output_dir":"out/123",
     "lr_scheduler_type": "linear",
     "warmup_ratio": 0.1,
