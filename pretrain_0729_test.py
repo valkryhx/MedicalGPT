@@ -564,3 +564,14 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+"""
+使用注意 ：程序固定读取了luzi.json的配置文件 不能在命令行中写save_steps参数 因为deepspeed也会读取命令行中的参数 从而也会在save_steps频次保存优化器的中间状态state 而这个文件很大
+这个bug在很多的github项目中都有 到目前为止 唯独我碰巧之前fork的项目没有 https://github.com/valkryhx/chatGLM-6B-QLoRA
+而那个是把trainingArgs写进了json  从而避免让deepspeed从命令行读取 真的很鸡贼。
+使用方法 ：
+!git pull --all --force
+!deepspeed --num_gpus 2 pretrain_0729_test.py \
+    --deepspeed ds_zero2_config.json
+
+"""
