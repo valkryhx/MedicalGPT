@@ -484,7 +484,7 @@ def main():
     if not tokenizer_name_or_path:
         tokenizer_name_or_path = "THUDM/chatglm2-6b" #model_args.model_name_or_path
     #tokenizer = AutoTokenizer.from_pretrained(tokenizer_name_or_path, **tokenizer_kwargs)
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name_or_path)
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name_or_path,trust_remote_code=True)
 
 
     if training_args.use_peft:
