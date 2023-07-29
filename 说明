@@ -1,4 +1,15 @@
+
+0. 在model_args class定义中加入
+local_rank: Optional[int] = field(
+        default=0,
+        metadata={"help": "只是为了接住从命令行中被deepspeed程序自动传来的local_rank值 "},
+    )
+    deepspeed: Optional[str] = field(
+        default="",
+        metadata={"help": "只是为了接住从命令行中传过来的ds config name "},
+    )
+
 1. luzi.json 不能出现deepspeed参数项
-2.model_args  dataset_args 两个成一个HfAruments.from dataclass
-3. TraingArgs 单独成一个HfArguments 一定从 parse from json 来 也就是luzi
-4. model args 中可以将deepspeed 和local rank 先存着 然后赋值给trainingargs
+2.model_args  dataset_args 两个成一个HfAruments.from dataclass   参考def main
+3. TraingArgs 单独成一个HfArguments 一定从 parse from json 来 也就是luzi  参考 def main
+4. model args 中可以将deepspeed 和local rank 先存着 然后赋值给trainingargs  参考 def main
