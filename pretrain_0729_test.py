@@ -208,6 +208,7 @@ def main():
     parser = HfArgumentParser((PeftArguments))
     #parser = HfArgumentParser((TrainingArguments))
     training_args , = parser.parse_json_file(json_file="luzi.json")
+    logger.info(f"FROM JSON FILE , training args={training_args}")
     logger.info(f"TYPE_OF_training_args = {type(training_args)}")
     training_args.qlora = True
     training_args.use_peft =True
@@ -215,6 +216,7 @@ def main():
     training_args.lora_rank = 64 
     training_args.lora_alpha = 16
     training_args.lora_dropout =0.05
+    logger.info(f"AFTER ADDING EXTRA ARGS , training args={training_args}")
     #logger.warning(f"Model args: {model_args}")
     #logger.warning(f"Data args: {data_args}")
     logger.warning(f"Training args: {training_args}")
