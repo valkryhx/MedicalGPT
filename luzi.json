@@ -1,10 +1,11 @@
 {
     "do_train":true,
     "do_eval":true,
-    "output_dir":"out/123",
-    "lr_scheduler_type": "linear",
+    "output_dir":"out/1234",
+    "lr_scheduler_type": "cosine",
+    "learning_rate" : 1e-4 ,
     "warmup_ratio": 0.1,
-    "logging_steps": 5,
+    "logging_steps": 10,
     "save_strategy": "steps",
     "save_steps": 10,
     "evaluation_strategy": "steps",
@@ -15,5 +16,9 @@
     "ddp_find_unused_parameters": false,
     "seed": 42,
     "report_to":"tensorboard" ,
-    "load_best_model_at_end":true
+    "load_best_model_at_end":true,
+    "overwrite_output_dir":true,
+
+    "qlora":true,
+    "use_peft":true,
 }
