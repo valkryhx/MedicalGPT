@@ -573,5 +573,13 @@ if __name__ == "__main__":
 !git pull --all --force
 !deepspeed --num_gpus 2 pretrain_0729_test.py \
     --deepspeed ds_zero2_config.json
-
+ds保存中间state问题的排查思路：
+注意这个程序是固定从json文件中获取training args
+我排查了很久 一步一步的：
+1.替换Trainer 无果
+2.逐步删去Model Args和Data Args
+3.终于缩小包围圈到trainingArgs 
+4. 之前对比代码我就猜到可能是获取trainingargs方式不同导致的 有个项目的作者也提了一嘴说这个保存的行为是deepspeed标准行为 那关键是为啥ds也按照这个频次保存呢？而我fork的那个简单项目就没有出现ds保存state的现象呢？我就愈发怀疑是：从json获取和从dataclass命令行获取的区别带来的 结果即使这样也排查了好久。
+5.https://huggingface.co/docs/transformers/main_classes/deepspeed#shared-configuration 根据这个ds和transformers结合的主页
+可以看出这里是存在公共参数的 有些会冲突 有些直接就被ds拿去通了 那save_steps很可能就是这样的 所以我用json而非命令行 让ds拿不到save_steps 就ok了。
 """
