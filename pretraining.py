@@ -51,7 +51,8 @@ from transformers import (
     TrainingArguments,
     is_torch_tpu_available,
     set_seed,
-    BitsAndBytesConfig
+    BitsAndBytesConfig,
+    deepspeed
 )
 from transformers.trainer import TRAINING_ARGS_NAME
 from transformers.utils import send_example_telemetry
@@ -429,7 +430,8 @@ def main():
                                  )
     else:
         raise ValueError(f"Error, model_name_or_path is None, Continue PT must be loaded from a pre-trained model")
-
+    logger.info(f'prepare_model_for_kbit_training(model)')
+    model = prepare_model_for_kbit_training(model)
     logger.info(f'memory footprint of model: {model.get_memory_footprint()/(1024*1024*1024)} GB')
     tokenizer_kwargs = {
         "cache_dir": model_args.cache_dir,
@@ -449,7 +451,7 @@ def main():
             logger.info("Init new peft model")
             target_modules = training_args.target_modules.split(',') if training_args.target_modules else None
             if target_modules and 'all' in target_modules:
-                target_modules = find_all_linear_names(model, int4=False, int8=model_args.load_in_8bit)
+                target_modules = find_all_linear_names(model, int4=model_args.qlora_4bit, int8=model_args.load_in_8bit)
             modules_to_save = training_args.modules_to_save
             if modules_to_save is not None:
                 modules_to_save = modules_to_save.split(',')
@@ -464,9 +466,9 @@ def main():
                 lora_dropout=training_args.lora_dropout,
                 modules_to_save=modules_to_save)
             model = get_peft_model(model, peft_config)
-        if model_args.load_in_8bit:
-            print("模型load_in_8bit=True,下面开始prepare_model_for_int8_training，从而在训练时减少显存消耗。")
-            model = prepare_model_for_int8_training(model)
+        #if model_args.load_in_8bit:
+        #    print("模型load_in_8bit=True,下面开始prepare_model_for_int8_training，从而在训练时减少显存消耗。")
+        #    model = prepare_model_for_int8_training(model)
         model.print_trainable_parameters()
     else:
         logger.info("Full parameters training")
