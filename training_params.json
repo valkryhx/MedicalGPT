@@ -38,7 +38,7 @@
     "lora_dropout" : 0.05 ,
     "torch_dtype" : "float16" ,
     "device_map" : "auto" ,
-    "report_to" : tensorboard" ,
+    "report_to" : "tensorboard" ,
     "ddp_find_unused_parameters" : false ,
     "gradient_checkpointing" : true ,
 }
