@@ -399,8 +399,9 @@ def find_all_linear_names(model):   ## add 20230728
 
 
 def main():
-    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
-    model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+    #parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
+    parser = HfArgumentParser((DataTrainingArguments, PeftArguments))
+     data_args, training_args = parser.parse_args_into_dataclasses()
 
     #logger.warning(f"Model args: {model_args}")
     logger.warning(f"Data args: {data_args}")
@@ -600,7 +601,7 @@ def main():
         raw_datasets = load_dataset(
             data_args.dataset_name,
             data_args.dataset_config_name,
-            cache_dir=model_args.cache_dir,
+            #cache_dir=model_args.cache_dir,
             streaming=data_args.streaming,
         )
         if "validation" not in raw_datasets.keys():
@@ -608,14 +609,14 @@ def main():
                 data_args.dataset_name,
                 data_args.dataset_config_name,
                 split=f"train[:{data_args.validation_split_percentage}%]",
-                cache_dir=model_args.cache_dir,
+                #cache_dir=model_args.cache_dir,
                 streaming=data_args.streaming,
             )
             raw_datasets["train"] = load_dataset(
                 data_args.dataset_name,
                 data_args.dataset_config_name,
                 split=f"train[{data_args.validation_split_percentage}%:]",
-                cache_dir=model_args.cache_dir,
+                #cache_dir=model_args.cache_dir,
                 streaming=data_args.streaming,
             )
     else:
@@ -634,7 +635,7 @@ def main():
         raw_datasets = load_dataset(
             extension,
             data_files=data_files,
-            cache_dir=model_args.cache_dir,
+            #cache_dir=model_args.cache_dir,
             **dataset_args,
         )
         # If no validation data is there, validation_split_percentage will be used to divide the dataset.
@@ -643,14 +644,14 @@ def main():
                 extension,
                 data_files=data_files,
                 split=f"train[:{data_args.validation_split_percentage}%]",
-                cache_dir=model_args.cache_dir,
+                #cache_dir=model_args.cache_dir,
                 **dataset_args,
             )
             raw_datasets["train"] = load_dataset(
                 extension,
                 data_files=data_files,
                 split=f"train[{data_args.validation_split_percentage}%:]",
-                cache_dir=model_args.cache_dir,
+                #cache_dir=model_args.cache_dir,
                 **dataset_args,
             )
     logger.info(f"Raw datasets: {raw_datasets}")
