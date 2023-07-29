@@ -276,11 +276,12 @@ def find_all_linear_names(model):   ## add 20230728
 
 def main():
     #parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
-    parser = HfArgumentParser((DataTrainingArguments, PeftArguments))
-    data_args, training_args = parser.parse_args_into_dataclasses()
+    #parser = HfArgumentParser((DataTrainingArguments, PeftArguments))
+    parser = HfArgumentParser((PeftArguments))
+    training_args = parser.parse_args_into_dataclasses()
 
     #logger.warning(f"Model args: {model_args}")
-    logger.warning(f"Data args: {data_args}")
+    #logger.warning(f"Data args: {data_args}")
     logger.warning(f"Training args: {training_args}")
     logger.warning(
         f"Process rank: {training_args.local_rank}, device: {training_args.device}, n_gpu: {training_args.n_gpu}"
@@ -402,23 +403,23 @@ def main():
     def tokenize_function(examples):
         return tokenizer(examples["text"])
 
-    if data_args.block_size is None:
-        block_size = tokenizer.model_max_length
-        if block_size > 1024:
-            logger.warning(
-                "The chosen tokenizer supports a `model_max_length` that is longer than the default `block_size` value"
-                " of 1024. If you would like to use a longer `block_size` up to `tokenizer.model_max_length` you can"
-                " override this default with `--block_size xxx`."
-            )
-            block_size = 1024
-    else:
-        if data_args.block_size > tokenizer.model_max_length:
-            logger.warning(
-                f"The block_size passed ({data_args.block_size}) is larger than the maximum length for the model"
-                f"({tokenizer.model_max_length}). Using block_size={tokenizer.model_max_length}."
-            )
-        block_size = min(data_args.block_size, tokenizer.model_max_length)
-
+    # if data_args.block_size is None:
+    #     block_size = tokenizer.model_max_length
+    #     if block_size > 1024:
+    #         logger.warning(
+    #             "The chosen tokenizer supports a `model_max_length` that is longer than the default `block_size` value"
+    #             " of 1024. If you would like to use a longer `block_size` up to `tokenizer.model_max_length` you can"
+    #             " override this default with `--block_size xxx`."
+    #         )
+    #         block_size = 1024
+    # else:
+    #     if data_args.block_size > tokenizer.model_max_length:
+    #         logger.warning(
+    #             f"The block_size passed ({data_args.block_size}) is larger than the maximum length for the model"
+    #             f"({tokenizer.model_max_length}). Using block_size={tokenizer.model_max_length}."
+    #         )
+    #     block_size = min(data_args.block_size, tokenizer.model_max_length)
+    block_size=256
     # Main data processing function that will concatenate all texts from our dataset and generate chunks of block_size.
     def group_texts(examples):
         # Concatenate all texts.
@@ -471,42 +472,42 @@ def main():
     #
     # In distributed training, the load_dataset function guarantee that only one local process can concurrently
     # download the dataset.
-    if data_args.dataset_name is not None:
-        # Downloading and loading a dataset from the hub.
-        raw_datasets = load_dataset(
-            data_args.dataset_name,
-            data_args.dataset_config_name,
-            #cache_dir=model_args.cache_dir,
-            streaming=data_args.streaming,
-        )
-        if "validation" not in raw_datasets.keys():
-            raw_datasets["validation"] = load_dataset(
-                data_args.dataset_name,
-                data_args.dataset_config_name,
-                split=f"train[:{data_args.validation_split_percentage}%]",
-                #cache_dir=model_args.cache_dir,
-                streaming=data_args.streaming,
-            )
-            raw_datasets["train"] = load_dataset(
-                data_args.dataset_name,
-                data_args.dataset_config_name,
-                split=f"train[{data_args.validation_split_percentage}%:]",
-                #cache_dir=model_args.cache_dir,
-                streaming=data_args.streaming,
-            )
-    else:
+    # if data_args.dataset_name is not None:
+    #     # Downloading and loading a dataset from the hub.
+    #     raw_datasets = load_dataset(
+    #         data_args.dataset_name,
+    #         data_args.dataset_config_name,
+    #         #cache_dir=model_args.cache_dir,
+    #         streaming=data_args.streaming,
+    #     )
+    #     if "validation" not in raw_datasets.keys():
+    #         raw_datasets["validation"] = load_dataset(
+    #             data_args.dataset_name,
+    #             data_args.dataset_config_name,
+    #             split=f"train[:{data_args.validation_split_percentage}%]",
+    #             #cache_dir=model_args.cache_dir,
+    #             streaming=data_args.streaming,
+    #         )
+    #         raw_datasets["train"] = load_dataset(
+    #             data_args.dataset_name,
+    #             data_args.dataset_config_name,
+    #             split=f"train[{data_args.validation_split_percentage}%:]",
+    #             #cache_dir=model_args.cache_dir,
+    #             streaming=data_args.streaming,
+    #         )
+    if True:
         data_files = {}
         dataset_args = {}
-        if data_args.train_file_dir is not None and os.path.exists(data_args.train_file_dir):
-            train_data_files = glob(f'{data_args.train_file_dir}/**/*.txt', recursive=True)
+        if "./data/pretrain" is not None and os.path.exists("./data/pretrain"):
+            train_data_files = glob(f'{"./data/pretrain"}/**/*.txt', recursive=True)
             logger.info(f"train files: {', '.join(train_data_files)}")
             data_files["train"] = train_data_files
-        if data_args.validation_file_dir is not None and os.path.exists(data_args.validation_file_dir):
-            eval_data_files = glob(f'{data_args.validation_file_dir}/**/*.txt', recursive=True)
+        if "./data/pretrain" is not None and os.path.exists("./data/pretrain"):
+            eval_data_files = glob(f'{"./data/pretrain"}/**/*.txt', recursive=True)
             logger.info(f"eval files: {', '.join(eval_data_files)}")
             data_files["validation"] = eval_data_files
         extension = "text"
-        dataset_args["keep_linebreaks"] = data_args.keep_linebreaks
+        dataset_args["keep_linebreaks"] = True #data_args.keep_linebreaks
         raw_datasets = load_dataset(
             extension,
             data_files=data_files,
@@ -518,16 +519,16 @@ def main():
             raw_datasets["validation"] = load_dataset(
                 extension,
                 data_files=data_files,
-                split=f"train[:{data_args.validation_split_percentage}%]",
+                split=f"train[:{10}%]",
                 #cache_dir=model_args.cache_dir,
-                **dataset_args,
+                ##**dataset_args,
             )
             raw_datasets["train"] = load_dataset(
                 extension,
                 data_files=data_files,
-                split=f"train[{data_args.validation_split_percentage}%:]",
+                split=f"train[{90}%:]",
                 #cache_dir=model_args.cache_dir,
-                **dataset_args,
+                ##**dataset_args,
             )
     logger.info(f"Raw datasets: {raw_datasets}")
 
@@ -538,20 +539,20 @@ def main():
         column_names = list(raw_datasets["validation"].features)
 
     with training_args.main_process_first(desc="Dataset tokenization and grouping"):
-        if not data_args.streaming:
+        if  True :#not data_args.streaming:
             tokenized_datasets = raw_datasets.map(
                 tokenize_function,
                 batched=True,
                 num_proc=data_args.preprocessing_num_workers,
                 remove_columns=column_names,
-                load_from_cache_file=not data_args.overwrite_cache,
+                #load_from_cache_file=not data_args.overwrite_cache,
                 desc="Running tokenizer on dataset",
             )
             lm_datasets = tokenized_datasets.map(
                 group_texts,
                 batched=True,
                 num_proc=data_args.preprocessing_num_workers,
-                load_from_cache_file=not data_args.overwrite_cache,
+                #load_from_cache_file=not data_args.overwrite_cache,
                 desc=f"Grouping texts in chunks of {block_size}",
             )
         else:
@@ -572,8 +573,8 @@ def main():
             raise ValueError("--do_train requires a train dataset")
         train_dataset = lm_datasets['train']
         max_train_samples = len(train_dataset)
-        if data_args.max_train_samples is not None and data_args.max_train_samples > 0:
-            max_train_samples = min(len(train_dataset), data_args.max_train_samples)
+        if True :      #if data_args.max_train_samples is not None and data_args.max_train_samples > 0:
+            max_train_samples = min(len(train_dataset), 1000)
             train_dataset = train_dataset.select(range(max_train_samples))
         logger.debug(f"Num train_samples: {len(train_dataset)}")
         logger.debug("Tokenized training example:")
@@ -586,8 +587,8 @@ def main():
             raise ValueError("--do_eval requires a validation dataset")
         eval_dataset = lm_datasets["validation"]
         max_eval_samples = len(eval_dataset)
-        if data_args.max_eval_samples is not None and data_args.max_eval_samples > 0:
-            max_eval_samples = min(len(eval_dataset), data_args.max_eval_samples)
+        if True : #if data_args.max_eval_samples is not None and data_args.max_eval_samples > 0:
+            max_eval_samples = min(len(eval_dataset), 10)
             eval_dataset = eval_dataset.select(range(max_eval_samples))
         logger.debug(f"Num eval_samples: {len(eval_dataset)}")
         logger.debug("Tokenized eval example:")
