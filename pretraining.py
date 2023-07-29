@@ -735,19 +735,20 @@ def main():
         logger.debug(tokenizer.decode(eval_dataset[0]['input_ids']))
 
     # Initialize our Trainer
-    if training_args.gradient_checkpointing:
-        model.gradient_checkpointing_enable()
-        model.config.use_cache = False
-    else:
-        model.config.use_cache = True
+    # if training_args.gradient_checkpointing:
+    #     model.gradient_checkpointing_enable()
+    #     model.config.use_cache = False
+    # else:
+    #     model.config.use_cache = True
+    # model.gradient_checkpointing_enable()  ## add 20230728
+    # model.enable_input_require_grads()
+    # if not ddp and torch.cuda.device_count() > 1:
+    #     # Keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
+    #     model.is_parallelizable = True
+    #     model.model_parallel = True
+
     model.gradient_checkpointing_enable()  ## add 20230728
     model.enable_input_require_grads()
-    if not ddp and torch.cuda.device_count() > 1:
-        # Keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
-        model.is_parallelizable = True
-        model.model_parallel = True
-
-
     trainer = LoRATrainer(
         model=model,
         args=training_args,
@@ -760,7 +761,7 @@ def main():
         else None,
     )
     logger.info("到这里了 1111111111111\n11111111111111\n11111111111111\n111111111111   ")
-    trainer.train()
+    #trainer.train()
 
 
 
