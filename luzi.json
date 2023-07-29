@@ -14,11 +14,18 @@
     "fp16": true,
     "remove_unused_columns": false,
     "ddp_find_unused_parameters": false,
-    "seed": 42,
+    "seed": 52,
     "report_to":"tensorboard" ,
     "load_best_model_at_end":true,
     "overwrite_output_dir":true,
 
     "qlora":true,
     "use_peft":true,
+    "target_modules" :"all",
+    "lora_rank" : 32 ,
+    "lora_dropout" :0.01 ,
+    "lora_alpha" : 8 ,
+    "modules_to_save": "none",
+    "peft_path":"none" 
+   
 }
