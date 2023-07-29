@@ -326,7 +326,17 @@ class SavePeftModelTrainer(Trainer):  ### from its sft.py
             torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
             logger.info("""the LoRA model saved """)
             
-
+## new
+class LoRATrainer(Trainer):
+    print("save !!!!!!")
+    def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
+        """只保存adapter"""
+        print("save 123 !!!!!!")
+        if output_dir is None:
+            output_dir = self.args.output_dir
+        if self.args.local_rank in [-1, 0]:
+            self.model.save_pretrained(output_dir)
+            torch.save(self.args, os.path.join(output_dir, "training_args.bin"))
 
 def save_model(output_dir, model, tokenizer, args):  #from its sft.py
     """Save the model and the tokenizer."""
@@ -737,6 +747,26 @@ def main():
         model.is_parallelizable = True
         model.model_parallel = True
 
+
+    trainer = LoRATrainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=eval_dataset,
+        data_collator=fault_tolerance_data_collator ,
+        compute_metrics=compute_metrics if training_args.do_eval and not is_torch_tpu_available() else None,
+        preprocess_logits_for_metrics=preprocess_logits_for_metrics
+       if training_args.do_eval and not is_torch_tpu_available()
+        else None,
+    )
+    logger.info("到这里了 1111111111111\n11111111111111\n11111111111111\n111111111111   ")
+    trainer.train()
+
+
+
+
+
+    
     trainer = SavePeftModelTrainer(
         model=model,
         args=training_args,
