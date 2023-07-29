@@ -41,4 +41,5 @@
     "report_to" : "tensorboard" ,
     "ddp_find_unused_parameters" : false ,
     "gradient_checkpointing" : true ,
+    "deepspeed" : "ds_zero2_config.json"
 }
