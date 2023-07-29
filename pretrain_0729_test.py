@@ -210,7 +210,7 @@ class PeftArguments(TrainingArguments):
     modules_to_save: Optional[str] = field(default=None)
     peft_path: Optional[str] = field(default=None)
     qlora: bool = field(default=False, metadata={"help": "Whether to use qlora"})
-    local_rank :int = field(default=0)
+    local_rank :int = field(default=os.environ["LOCAL_RANK"])
 
 def accuracy(predictions, references, normalize=True, sample_weight=None):
     return {
@@ -359,10 +359,10 @@ def main():
     training_args_parser =  HfArgumentParser(PeftArguments)  ## ADD 注意这是个tuple 虽然只有一个元素 但是要加逗号才能正常解析成PeftArguments
     
     training_args , = training_args_parser.parse_json_file(json_file="luzi.json")  ## ADD
-    if model_args.deepspeed and len(model_args.deepspeed.strip()) > 0 :
-        training_args.deepspeed = model_args.deepspeed  ##add 命令行传入的deepspeed参数先让model arg接住 再传给trainingargs
-    if model_args.local_rank :
-        training_args.local_rank = model_args.local_rank ## add  这个是deepspeed自动传入的 也是先让modelargs接住 再传给trainingargs
+    #if model_args.deepspeed and len(model_args.deepspeed.strip()) > 0 :
+    #    training_args.deepspeed = model_args.deepspeed  ##add 命令行传入的deepspeed参数先让model arg接住 再传给trainingargs
+    #if model_args.local_rank :
+    #    training_args.local_rank = model_args.local_rank ## add  这个是deepspeed自动传入的 也是先让modelargs接住 再传给trainingargs
     
 
     ## 下面是正确的写法
