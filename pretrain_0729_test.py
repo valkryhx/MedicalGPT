@@ -209,9 +209,14 @@ def main():
     parser = HfArgumentParser((PeftArguments))
     #parser = HfArgumentParser((TrainingArguments))
     training_args , = parser.parse_json_file(json_file="luzi.json")
-    logger.info(f"从json获取的training ars,非最终版本 , training args={training_args}")
-    logger.info(f"TYPE_OF_training_args = {type(training_args)}")
-    parser = argparse.ArgumentParser(description='DO NOT INCLUDE PARAM:SAVE_STEPS,OTHERWISE DEEPSPEED WILL SAVE HUGE INTERMEDIATE STATE!')
+
+    training_args.deepspeed = "ds_zero2_config.json"
+
+
+    
+    #logger.info(f"从json获取的training ars,非最终版本 , training args={training_args}")
+    #logger.info(f"TYPE_OF_training_args = {type(training_args)}")
+    #parser = argparse.ArgumentParser(description='DO NOT INCLUDE PARAM:SAVE_STEPS,OTHERWISE DEEPSPEED WILL SAVE HUGE INTERMEDIATE STATE!')
     
     ## 用命令行输出的参数新值来覆盖从json文件中读取的旧值  注意！！！！ cmd_args不能包含save_steps参数 不然会让deepspeed也莫名的获取到这个参数 从而按照这个频次保存中间状态 很大的文件 基本是模型参数级别 很烦
     # training_args.qlora = True
