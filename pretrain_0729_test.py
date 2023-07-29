@@ -134,7 +134,7 @@ class PeftArguments(TrainingArguments):
     modules_to_save: Optional[str] = field(default=None)
     peft_path: Optional[str] = field(default=None)
     qlora: bool = field(default=False, metadata={"help": "Whether to use qlora"})
-    
+    local_rank :int = field(default=0)
 
 def accuracy(predictions, references, normalize=True, sample_weight=None):
     return {
