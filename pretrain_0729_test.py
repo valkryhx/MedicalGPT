@@ -438,7 +438,7 @@ def main():
                                   bnb_4bit_use_double_quant=True,
                                   bnb_4bit_compute_dtype=torch.float16 ,#_compute_dtype_map[model_args.compute_dtype]
                                          )
-            model = model_class.from_pretrained(
+            model = AutoModel.from_pretrained(
                                   "THUDM/chatglm2-6b",#model_args.model_name_or_path,
                                   load_in_4bit=False,#model_args.load_in_4bit,
                                   quantization_config=q_config,
