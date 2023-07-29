@@ -201,6 +201,10 @@ class PeftArguments(TrainingArguments):
     modules_to_save: Optional[str] = field(default=None)
     peft_path: Optional[str] = field(default=None)
     qlora: bool = field(default=False, metadata={"help": "Whether to use qlora"})
+    train_args_json: str=field(default='luzi.json')
+    max_input_length:int=filed(default=256) 
+    max_output_length:int=filed(default=256) 
+    compute_dtype:str=filed(default='fp16')
 
 def accuracy(predictions, references, normalize=True, sample_weight=None):
     return {
