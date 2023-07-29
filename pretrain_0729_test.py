@@ -50,77 +50,10 @@ from transformers import (
 from transformers.trainer import TRAINING_ARGS_NAME
 from transformers.utils.versions import require_version
 
-# MODEL_CLASSES = {
-#     "bloom": (AutoConfig, BloomForCausalLM, BloomTokenizerFast),
-#     "chatglm": (AutoConfig, AutoModel, AutoTokenizer),
-#     "llama": (AutoConfig, LlamaForCausalLM, LlamaTokenizer),
-#     "baichuan": (AutoConfig, AutoModelForCausalLM, AutoTokenizer),
-#     "auto": (AutoConfig, AutoModelForCausalLM, AutoTokenizer),
-# }
 
 
-# @dataclass
-# class ModelArguments:
-#     """
-#     Arguments pertaining to which model/config/tokenizer we are going to fine-tune, or train from scratch.
-#     """
 
-#     model_type: str = field(
-#         default=None,
-#         metadata={"help": "Model type selected in the list: " + ", ".join(MODEL_CLASSES.keys())}
-#     )
-#     model_name_or_path: Optional[str] = field(
-#         default=None,
-#         metadata={
-#             "help": (
-#                 "The model checkpoint for weights initialization.Don't set if you want to train a model from scratch."
-#             )
-#         },
-#     )
-#     tokenizer_name_or_path: Optional[str] = field(
-#         default=None,
-#         metadata={
-#             "help": (
-#                 "The tokenizer for weights initialization.Don't set if you want to train a model from scratch."
-#             )
-#         },
-#     )
-#     load_in_4bit: bool = field(default=False, metadata={"help": "Very important to play on kaggle!!!Whether to load the model in 4bit mode or not."})
-#     load_in_8bit: bool = field(default=False, metadata={"help": "Whether to load the model in 8bit mode or not."})
-#     cache_dir: Optional[str] = field(
-#         default=None,
-#         metadata={"help": "Where do you want to store the pretrained models downloaded from huggingface.co"},
-#     )
-#     use_fast_tokenizer: bool = field(
-#         default=False,
-#         metadata={"help": "Whether to use one of the fast tokenizer (backed by the tokenizers library) or not."},
-#     )
-#     torch_dtype: Optional[str] = field(
-#         default=None,
-#         metadata={
-#             "help": (
-#                 "Override the default `torch.dtype` and load the model under this dtype. If `auto` is passed, the "
-#                 "dtype will be automatically derived from the model's weights."
-#             ),
-#             "choices": ["auto", "bfloat16", "float16", "float32"],
-#         },
-#     )
-#     device_map: Optional[str] = field(
-#         default="auto",
-#         metadata={"help": "Device to map model to. If `auto` is passed, the device will be selected automatically. "},
-#     )
-#     trust_remote_code: bool = field(
-#         default=True,
-#         metadata={"help": "Whether to trust remote code when loading a model from a remote checkpoint."},
-#     )
 
-#     def __post_init__(self):
-#         if self.model_type is None:
-#             raise ValueError(
-#                 "You must specify a valid model_type to run training. Available model types are " + ", ".join(
-#                     MODEL_CLASSES.keys()))
-#         if self.model_name_or_path is None:
-#             raise ValueError("You must specify a valid model_name_or_path to run training.")
 
 
 @dataclass
@@ -290,32 +223,6 @@ class GroupTextsBuilder:
         return result
 
 
-# class SavePeftModelTrainer_old(Trainer):
-#     """
-#     Trainer for lora models
-#     """
-
-#     def save_model_old(self, output_dir=None, _internal_call=False):
-#         """Save the LoRA model."""
-#         logger.info("begin to save during SavePeftModelTrainer.traininig")
-#         os.makedirs(output_dir, exist_ok=True)
-#         self.model.save_pretrained(output_dir)
-#         logger.info("model saved during  SavePeftModelTrainer.traininig")
-#         #torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
-#         ############torch.save(self.args, os.path.join(output_dir, "training_args.bin"))  老子把这行注释总行了吧
-#         logger.info("DO NOT SAVE THE FXXKING HUGE training args of deepspeed in SavePeftModelTrainer.traininig")
-
-# class SavePeftModelTrainer(Trainer):  ### from its sft.py
-#     """
-#     Trainer for lora models
-#     """
-
-#     def save_model(self, output_dir=None, _internal_call=False):
-#         """Save the LoRA model."""
-#         os.makedirs(output_dir, exist_ok=True)
-#         if self.args.local_rank in [-1, 0]:   ##　只在主进程中保存　也就local_rank =0  process保存
-#             torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
-#             self.model.save_pretrained(output_dir)
 
 ## new
 class LoRATrainer(Trainer):
@@ -329,16 +236,6 @@ class LoRATrainer(Trainer):
             self.model.save_pretrained(output_dir)
             torch.save(self.args, os.path.join(output_dir, "training_args.bin"))
 
-# def save_model(output_dir, model, tokenizer, args):  from its sft.py
-#     """Save the model and the tokenizer."""
-#     os.makedirs(output_dir, exist_ok=True)
-
-#     # Take care of distributed/parallel training
-#     model_to_save = model.module if hasattr(model, "module") else model
-#     if args.local_rank in [-1, 0]:
-#         model_to_save.save_pretrained(output_dir)
-#         tokenizer.save_pretrained(output_dir)
-#         torch.save(args, os.path.join(output_dir, TRAINING_ARGS_NAME))
 
 
 
@@ -375,27 +272,6 @@ def find_all_linear_names(model):   ## add 20230728
     if  'output_layer' in lora_module_names:
         lora_module_names.remove('output_layer')
     return list(lora_module_names)
-
-
-# def find_all_linear_names_old(peft_model, int4=False, int8=False):
-#     """Find all linear layer names in the model. reference from qlora paper."""
-#     cls = torch.nn.Linear
-#     if int4 or int8:
-#         if int4:
-#             cls = bnb.nn.Linear4bit
-#         elif int8:
-#             cls = bnb.nn.Linear8bitLt
-#     lora_module_names = set()
-#     for name, module in peft_model.named_modules():
-#         if isinstance(module, cls):
-#             # last layer is not add to lora_module_names
-#             if 'lm_head' in name:
-#                 continue
-#             if 'output_layer' in name :
-#                 continue
-#             names = name.split('.')
-#             lora_module_names.add(names[0] if len(names) == 1 else names[-1])
-#     return sorted(lora_module_names)
 
 
 def main():
@@ -474,12 +350,7 @@ def main():
     else:
         raise ValueError(f"Error, model_name_or_path is None, SFT must be loaded from a pre-trained model")
     logger.info(f'memory footprint of model: {model.get_memory_footprint()/(1024*1024*1024)} GB')
-    # Load tokenizer
-    # tokenizer_kwargs = {
-    #     "cache_dir": model_args.cache_dir,
-    #     "use_fast": model_args.use_fast_tokenizer,
-    #     "trust_remote_code": model_args.trust_remote_code,
-    # }
+
     tokenizer_name_or_path = "THUDM/chatglm2-6b" #model_args.tokenizer_name_or_path
     if not tokenizer_name_or_path:
         tokenizer_name_or_path = "THUDM/chatglm2-6b" #model_args.model_name_or_path
