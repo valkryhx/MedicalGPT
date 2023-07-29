@@ -212,57 +212,18 @@ def main():
     logger.info(f"从json获取的training ars,非最终版本 , training args={training_args}")
     logger.info(f"TYPE_OF_training_args = {type(training_args)}")
     parser = argparse.ArgumentParser(description='DO NOT INCLUDE PARAM:SAVE_STEPS,OTHERWISE DEEPSPEED WILL SAVE HUGE INTERMEDIATE STATE!')
-    parser.add_argument('--qlora',
-                      help='This is a boolean flag.',
-                      type=eval, 
-                      choices=[True, False], 
-                      default='True')
-    parser.add_argument('--use_peft',
-                      help='This is a boolean flag.',
-                      type=eval, 
-                      choices=[True, False], 
-                      default='True')
-    parser.add_argument('--target_modules',
-                      type=str,
-                      default='all')
-    parser.add_argument('--lora_rank',
-                      type=int,
-                      default=64)
-    parser.add_argument('--lora_alpha',
-                      type=int,
-                      default=16)
-    parser.add_argument('--lora_dropout',
-                      type=float,
-                      default=0.05)
-    parser.add_argument('--overwrite_output_dir',
-                      type=eval, 
-                      choices=[True, False], 
-                      default='True')
-    parser.add_argument('--per_device_train_batch_size',
-                      type=int,
-                      default=2)
-    parser.add_argument('--per_device_eval_batch_size',
-                      type=int,
-                      default=2)
-    parser.add_argument('--output_dir',
-                      type=str,
-                      default="pt_123")
-    parser.add_argument('--learning_rate',
-                      type=float,
-                      default=1e-5)
     
-    cmd_args = parser.parse_args()
     ## 用命令行输出的参数新值来覆盖从json文件中读取的旧值  注意！！！！ cmd_args不能包含save_steps参数 不然会让deepspeed也莫名的获取到这个参数 从而按照这个频次保存中间状态 很大的文件 基本是模型参数级别 很烦
-    training_args.qlora = cmd_args.qlora
-    training_args.use_peft =cmd_args.use_peft
-    training_args.target_modules = cmd_args.target_modules
-    training_args.lora_rank = cmd_args.lora_rank 
-    training_args.lora_alpha = cmd_args.lora_alpha
-    training_args.lora_dropout = cmd_args.lora_dropout
-    training_args.per_device_train_batch_size =cmd_arg.per_device_train_batch_size
-    training_args.per_device_eval_batch_size = cmd_arg.per_device_eval_batch_size
-    training_args.output_dir = cmd_arg.output_dir
-    training_args.learning_rate = cmd_arg.learning_rate
+    # training_args.qlora = True
+    # training_args.use_peft =cmd_args.use_peft
+    # training_args.target_modules = cmd_args.target_modules
+    # training_args.lora_rank = cmd_args.lora_rank 
+    # training_args.lora_alpha = cmd_args.lora_alpha
+    # training_args.lora_dropout = cmd_args.lora_dropout
+    # training_args.per_device_train_batch_size =cmd_arg.per_device_train_batch_size
+    # training_args.per_device_eval_batch_size = cmd_arg.per_device_eval_batch_size
+    # training_args.output_dir = cmd_arg.output_dir
+    # training_args.learning_rate = cmd_arg.learning_rate
     #logger.info(f"AFTER ADDING EXTRA ARGS , training args={training_args}")
     #logger.warning(f"Model args: {model_args}")
     #logger.warning(f"Data args: {data_args}")
