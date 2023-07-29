@@ -373,11 +373,18 @@ def main():
     #parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
     #model_args, data_args, training_args = parser.parse_args_into_dataclasses()
 
-    ## add 20230729 只要modelArg和DatasetArg 单独从json中读取trainArg
-    parser = HfArgumentParser((ModelArguments, DataTrainingArguments,PeftArguments))
-    model_args, data_args ,training_args_not_use = parser.parse_args_into_dataclasses()
+    ## add 20230730 只要modelArg和DatasetArg 而单独从json中读取trainArg
 
-    _ , _ , training_args = parser.parse_json_file(json_file="training_params.json")
+    parser = HfArgumentParser((ModelArguments, DataTrainingArguments))  ##add 
+    model_args, data_args = parser.parse_args_into_dataclasses()  ## modify training_args 不能来自命令行参数
+    
+    training_args_parser =  HfArgumentParser(PeftArguments)  ## ADD 注意这是个tuple 虽然只有一个元素 但是要加逗号才能正常解析成PeftArguments
+    training_args , = training_args_parser.parse_json_file(json_file="luzi.json")  ## ADD
+    if model_args.deepspeed and len(model_args.deepspeed.strip()) > 0 :
+        training_args.deepspeed = model_args.deepspeed  ##add 命令行传入的deepspeed参数先让model arg接住 再传给trainingargs
+    if model_args.local_rank :
+        training_args.local_rank = model_args.local_rank ## add  这个是deepspeed自动传入的 也是先让modelargs接住 再传给trainingargs
+
     ## add end
     
     logger.warning(f"Model args: {model_args}")
