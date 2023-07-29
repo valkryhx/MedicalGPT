@@ -463,7 +463,7 @@ def main():
                                  "THUDM/chatglm2-6b", #model_args.model_name_or_path,
                                  load_in_8bit=False,#model_args.load_in_8bit,
                                  #cache_dir=model_args.cache_dir,
-                                 torch_dtype=torch_dtype,
+                                 torch_dtype=torch.float16,##torch_dtype,
                                  #device_map=model_args.device_map,
                                  trust_remote_code=True, #model_args.trust_remote_code,
                                  )
