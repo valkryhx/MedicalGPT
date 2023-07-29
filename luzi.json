@@ -35,7 +35,7 @@
     "lora_rank" : 32 ,
     "lora_dropout" :0.01 ,
     "lora_alpha" : 8 ,
-    "modules_to_save": "none",
-    "peft_path":"none" 
+    "modules_to_save": null,
+    "peft_path": null 
    
 }
