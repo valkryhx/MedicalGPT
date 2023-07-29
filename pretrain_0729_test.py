@@ -283,10 +283,11 @@ def main():
     #logger.warning(f"Model args: {model_args}")
     #logger.warning(f"Data args: {data_args}")
     logger.warning(f"Training args: {training_args}")
-    logger.warning(
-        f"Process rank: {training_args.local_rank}, device: {training_args.device}, n_gpu: {training_args.n_gpu}"
-        + f" distributed training: {bool(training_args.local_rank != -1)}, 16-bits training: {training_args.fp16}"
-    )
+    logger.info(f"11111111111111111111111==={training_args.output_dir}")
+    # logger.warning(
+    #     f"Process rank: {training_args.local_rank}, device: {training_args.device}, n_gpu: {training_args.n_gpu}"
+    #     + f" distributed training: {bool(training_args.local_rank != -1)}, 16-bits training: {training_args.fp16}"
+    # )
 
     # Set seed before initializing model.
     set_seed(training_args.seed)
