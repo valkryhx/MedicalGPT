@@ -1,4 +1,4 @@
-{
+{   "model_type","chatglm",
     "output_dir" : "outputs-pt-0729-v1" ,
     "lr_scheduler_type": "cosine",
     "warmup_ratio": 0.1,
