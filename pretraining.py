@@ -205,6 +205,7 @@ class PeftArguments(TrainingArguments):
     max_input_length:int=filed(default=256) 
     max_output_length:int=filed(default=256) 
     compute_dtype:str=filed(default='fp16')
+    model_name_or_path:str=filed(default="")
 
 def accuracy(predictions, references, normalize=True, sample_weight=None):
     return {
