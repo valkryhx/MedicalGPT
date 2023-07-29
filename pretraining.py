@@ -377,7 +377,7 @@ def main():
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments,PeftArguments))
     model_args, data_args ,_ = parser.parse_args_into_dataclasses()
 
-    training_args, = parser.parse_json_file(json_file="traing_params.json")
+    training_args = parser.parse_json_file(json_file="traing_params.json")
     ## add end
     
     logger.warning(f"Model args: {model_args}")
