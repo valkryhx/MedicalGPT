@@ -443,7 +443,7 @@ def main():
                                   load_in_4bit=False,#model_args.load_in_4bit,
                                   quantization_config=q_config,
                                   #cache_dir=model_args.cache_dir,
-                                  torch_dtype=torch_dtype,
+                                  torch_dtype=torch.float16, #torch_dtype,
                                   #device_map=model_args.device_map,
                                   trust_remote_code=True,#model_args.trust_remote_code,
                 
