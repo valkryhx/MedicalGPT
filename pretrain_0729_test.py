@@ -277,8 +277,8 @@ def find_all_linear_names(model):   ## add 20230728
 def main():
     #parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
     #parser = HfArgumentParser((DataTrainingArguments, PeftArguments))
-    #parser = HfArgumentParser((PeftArguments))
-    parser = HfArgumentParser((TrainingArguments))
+    parser = HfArgumentParser((PeftArguments))
+    #parser = HfArgumentParser((TrainingArguments))
     training_args , = parser.parse_args_into_dataclasses()
     logger.info(f"TYPE_OF_training_args = {type(training_args)}")
     training_args.qlora = True
