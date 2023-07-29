@@ -368,9 +368,17 @@ def find_all_linear_names(peft_model, int4=False, int8=False):
 
 
 def main():
-    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
-    model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+    #modify 20230729
+    ##parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
+    ##model_args, data_args, training_args = parser.parse_args_into_dataclasses()
 
+    ## add 20230729 只要modelArg和DatasetArg 单独从json中读取trainArg
+    parser = HfArgumentParser((ModelArguments, DataTrainingArguments))
+    model_args, data_args = parser.parse_args_into_dataclasses()
+
+    training_args, = parser.parse_json_file(json_file="traing_params.json")
+    ## add end
+    
     logger.warning(f"Model args: {model_args}")
     logger.warning(f"Data args: {data_args}")
     logger.warning(f"Training args: {training_args}")
@@ -658,11 +666,11 @@ def main():
 
     ##add 20230717 modify 20230729 这样的话 不在命令行中传入save_steps参数 看看deepspeed会不会继续保存中间的state ckpt 
     ## 也确保了load_best_model_at_end 要求的eval_steps = save_steps
-    training_args.evaluation_strategy = "steps"
-    training_args.eval_steps =  10
-    training_args.load_best_model_at_end=True
-    training_args.save_stategy ="steps"
-    training_args.save_steps = training_args.eval_steps
+    # training_args.evaluation_strategy = "steps"
+    # training_args.eval_steps =  10
+    # training_args.load_best_model_at_end=True
+    # training_args.save_stategy ="steps"
+    # training_args.save_steps = training_args.eval_steps
     
     ##add end 
     
