@@ -477,7 +477,7 @@ def main():
             model.output_layer = CastOutputToFloat(model.output_layer)
     else:
         raise ValueError(f"Error, model_name_or_path is None, SFT must be loaded from a pre-trained model")
-    logger.info(f'memory footprint of model: {model.get_memory_footprint()/(1024*1024*1024)} GB')
+    logger.info(f'memory footprint of base model: {model.get_memory_footprint()/(1024*1024*1024)} GB')
     # Load tokenizer
     tokenizer_kwargs = {
         "cache_dir": model_args.cache_dir,
@@ -522,6 +522,7 @@ def main():
         ##    model = prepare_model_for_int8_training(model)
         #logger.info("prepare_model_for_kbit_training...")  ## add  
         #model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True) ## add  不能写在这里 这会让trainable args为0 要写在加载loraConfig之前
+        logger.info(f'memory footprint of peft model: {model.get_memory_footprint()/(1024*1024*1024)} GB')
         model.print_trainable_parameters()
     else:
         logger.info("Full parameters training")
