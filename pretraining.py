@@ -389,8 +389,9 @@ def find_all_linear_names_old(peft_model, int4=False, int8=False):
 
 def main():
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
-    model_args, data_args, training_args = parser.parse_args_into_dataclasses()
-
+    model_args, data_args, _ = parser.parse_args_into_dataclasses()  ## modify training_args 不能来自命令行参数
+    training_args_parser =  HfArgumentParser(PeftArguments)  ## ADD 注意这是个tuple 虽然只有一个元素 但是要加逗号才能正常解析成PeftArguments
+    training_args , = training_args_parser.parse_json_file(json_file="luzi.json")  ## ADD
     logger.warning(f"Model args: {model_args}")
     logger.warning(f"Data args: {data_args}")
     logger.warning(f"Training args: {training_args}")
