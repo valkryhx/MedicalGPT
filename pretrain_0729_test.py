@@ -280,6 +280,7 @@ def main():
     #parser = HfArgumentParser((PeftArguments))
     parser = HfArgumentParser((TrainingArguments))
     training_args = parser.parse_args_into_dataclasses()
+    logger.info(f"TYPE_OF_training_args = {type(training_args)}")
     training_args.qlora = True
     training_args.use_peft =True
     training_args.target_modules = 'all'
