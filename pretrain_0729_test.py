@@ -483,7 +483,9 @@ def main():
     tokenizer_name_or_path = "THUDM/chatglm2-6b" #model_args.tokenizer_name_or_path
     if not tokenizer_name_or_path:
         tokenizer_name_or_path = "THUDM/chatglm2-6b" #model_args.model_name_or_path
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name_or_path, **tokenizer_kwargs)
+    #tokenizer = AutoTokenizer.from_pretrained(tokenizer_name_or_path, **tokenizer_kwargs)
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name_or_path)
+
 
     if training_args.use_peft:
         if training_args.peft_path is not None:
@@ -519,6 +521,7 @@ def main():
         #logger.info("prepare_model_for_kbit_training...")  ## add  
         #model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True) ## add  不能写在这里 这会让trainable args为0 要写在加载loraConfig之前
         model.print_trainable_parameters()
+        logger.info(f'after peft memory footprint of model: {model.get_memory_footprint()/(1024*1024*1024)} GB')
     else:
         logger.info("Full parameters training")
         model = model.float()
