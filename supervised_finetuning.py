@@ -46,40 +46,16 @@ from transformers import (
 from transformers.deepspeed import is_deepspeed_zero3_enabled
 from transformers.trainer import TRAINING_ARGS_NAME
 from transformers.trainer_pt_utils import LabelSmoother
-from modeling_chatglm import ChatGLMForConditionalGeneration  ### addd
-from tokenization_chatglm import ChatGLMTokenizer  ### add
-from configuration_chatglm import ChatGLMConfig  ### add
+
 MODEL_CLASSES = {
     "bloom": (AutoConfig, BloomForCausalLM, BloomTokenizerFast),
-    #"chatglm": (AutoConfig, AutoModel, AutoTokenizer),
-    "chatglm": (ChatGLMConfig, ChatGLMForConditionalGeneration, ChatGLMTokenizer),
+    "chatglm": (AutoConfig, AutoModel, AutoTokenizer),
     "llama": (AutoConfig, LlamaForCausalLM, LlamaTokenizer),
     "baichuan": (AutoConfig, AutoModelForCausalLM, AutoTokenizer),
     "auto": (AutoConfig, AutoModelForCausalLM, AutoTokenizer),
 }
 
 IGNORE_INDEX = LabelSmoother.ignore_index
-
-
-
-"""
-下面的class ModelArguments/DataTrainingArguments/PeftArguments 分别定义了三类参数
-分别用于对模型的初始化 对参与训练和评估的数据集的配置 以及对peft模型的配置
-注意class PeftArguments(TrainingArguments) 说明PeftArguments是继承TrainingArguments类的 最后传给Train中args参数 也是PeftArguments(TrainingArguments)类的对象
-可以从下面的代码看出 
-def main():
-    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, PeftArguments))
-    model_args, data_args, training_args = parser.parse_args_into_dataclasses()
-parser中最后一个对象对应PeftArguments， 赋值给了training_args 而training_args中由继承而来 包含了很多https://huggingface.co/transformers/v3.0.2/main_classes/trainer.html#transformers.TrainingArguments
-定义的参数 比如per_device_train_batch_size/per_device_eval_batch_size  最后Trainer中也是将training_args 传入 作为真正的训练args，见896行附近
-trainer = SavePeftModelTrainer(
-        model=model,
-        args=training_args, ##这里
-
-
-
-"""
-
 
 
 @dataclass
@@ -204,8 +180,7 @@ class PeftArguments(TrainingArguments):
     modules_to_save: Optional[str] = field(default=None)
     peft_path: Optional[str] = field(default=None, metadata={"help": "The path to the peft model"})
     qlora: bool = field(default=False, metadata={"help": "Whether to use qlora"})
-    """下面的没必要加  使用--deepspeed 自动会在PeftArguments(TrainingArguments) 中加入deepspeed参数"""
-    #deepspeed:str = field(default="ds_zero2_config.json" , metadata={"help":"ds config file path"})
+
 
 class CastOutputToFloat(torch.nn.Sequential):
     """Cast the output of the model to float"""
@@ -858,7 +833,6 @@ def main():
             low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
             device_map=model_args.device_map,
             trust_remote_code=model_args.trust_remote_code,
-            empty_init=False,
             quantization_config=BitsAndBytesConfig(
                 load_in_4bit=True,
                 bnb_4bit_use_double_quant=True,
