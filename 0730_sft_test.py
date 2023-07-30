@@ -20,7 +20,11 @@ part of this code is adapted from https://github.com/shibing624/textgen
 
 """
 修改了chatglm的ChatGLMForConditionalGeneration的导入 直接从修改了的本地文件读 而不能是automodel 因为automodel会从hf官网加载 而官网文件有bug
-
+不然会报错 RuntimeError: Subtraction, the `-` operator, with a bool tensor is not 
+supported. If you are trying to invert a mask, use the `~` or `logical_not()` 
+operator instead.
+参考 https://huggingface.co/THUDM/chatglm2-6b/discussions/67
+     https://github.com/shibing624/MedicalGPT/issues/124
 """
 from modeling_chatglm import ChatGLMForConditionalGeneration
 from tokenization_chatglm import ChatGLMTokenizer 
