@@ -17,6 +17,15 @@ Fine-tuning the library models for causal language modeling (GPT, GPT-2, CTRL, .
 
 part of this code is adapted from https://github.com/shibing624/textgen
 """
+
+"""
+修改了chatglm的ChatGLMForConditionalGeneration的导入 直接从修改了的本地文件读 而不能是automodel 因为automodel会从hf官网加载 而官网文件有bug
+
+"""
+from modeling_chatglm import ChatGLMForConditionalGeneration
+from tokenization_chatglm import ChatGLMTokenizer 
+from configuration_chatglm import ChatGLMConfig
+from tok
 import math
 import os
 from dataclasses import dataclass, field
@@ -50,7 +59,8 @@ from transformers.trainer_pt_utils import LabelSmoother
 
 MODEL_CLASSES = {
     "bloom": (AutoConfig, BloomForCausalLM, BloomTokenizerFast),
-    "chatglm": (AutoConfig, AutoModel, AutoTokenizer),
+    #"chatglm": (AutoConfig, AutoModel, AutoTokenizer),
+    "chatglm": (ChatGLMConfig, ChatGLMForConditionalGeneration, ChatGLMTokenizer),  ## add  改成从本地文件导入类
     "llama": (AutoConfig, LlamaForCausalLM, LlamaTokenizer),
     "baichuan": (AutoConfig, AutoModelForCausalLM, AutoTokenizer),
     "auto": (AutoConfig, AutoModelForCausalLM, AutoTokenizer),
