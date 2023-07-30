@@ -470,7 +470,7 @@ def main():
                                   # THUDM/chatglm2 估计modeling_chatglm.py 默认是True  好坑！
                                   # 果然 一查真的是 https://huggingface.co/THUDM/chatglm2-6b/blob/main/modeling_chatglm.py#L732
                                   
-                                  empty_init=False,   # https://github.com/THUDM/ChatGLM-6B/issues/530 
+                                  #empty_init=False,   # https://github.com/THUDM/ChatGLM-6B/issues/530 
                                  )  
         else :     
             model = model_class.from_pretrained(
