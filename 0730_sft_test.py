@@ -869,7 +869,7 @@ def main():
                 low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
                 device_map=model_args.device_map,
                 trust_remote_code=model_args.trust_remote_code,
-                empty_init=False,   这个参数只有chatglm才有 其他model没有 # https://github.com/THUDM/ChatGLM-6B/issues/530   #### chatglm2 must have this line to use deepspeed
+                empty_init=False,   #这个参数只有chatglm才有 其他model没有 # https://github.com/THUDM/ChatGLM-6B/issues/530   #### chatglm2 must have this line to use deepspeed
                 quantization_config=BitsAndBytesConfig(
                 load_in_4bit=True,
                 bnb_4bit_use_double_quant=True,
