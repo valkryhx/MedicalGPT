@@ -26,7 +26,7 @@ from typing import List, Sequence, Optional, Dict
 import torch
 from datasets import load_dataset
 from loguru import logger
-from peft import LoraConfig, TaskType, get_peft_model, PeftModel, prepare_model_for_int8_training
+from peft import LoraConfig, TaskType, get_peft_model, PeftModel, prepare_model_for_int8_training,prepare_model_for_kbit_training
 from transformers import (
     AutoConfig,
     BloomForCausalLM,
