@@ -755,11 +755,11 @@ def main():
                     logger.warning(f"valid conversation is = {conversation}")
                     raise ValueError("test valid")
                 
-                if cur_len != total_len:
+                elif cur_len != total_len:
                     target[:] = IGNORE_INDEX
                     logger.warning(f"tokenization mismatch: {cur_len} vs. {total_len}. (ignored)")
                     logger.warning(f"bug conversation is = {conversation}")
-                    raise ValueError("test bug")
+                    #raise ValueError("test bug")
                 
                     
 
