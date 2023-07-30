@@ -29,7 +29,7 @@ operator instead.
 from modeling_chatglm import ChatGLMForConditionalGeneration
 from tokenization_chatglm import ChatGLMTokenizer 
 from configuration_chatglm import ChatGLMConfig
-from tok
+## add 
 import math
 import os
 from dataclasses import dataclass, field
