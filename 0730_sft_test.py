@@ -781,7 +781,7 @@ def main():
                 elif cur_len != total_len:
                     target[:] = IGNORE_INDEX
                     logger.warning(f"tokenization mismatch: {cur_len} vs. {total_len}. (ignored)")
-                    logger.warning(f"bug conversation is = {conversation}")
+                    #logger.warning(f"bug conversation is = {conversation}")
                     #raise ValueError("test bug")
                     count_bad += 1
             #if count_ok>5 and count_bad >5 :  ##我自己加的输出几个样例观察　答到５个就停
@@ -861,23 +861,42 @@ def main():
             torch_dtype=torch_dtype,
             cache_dir=model_args.cache_dir
         )
-        model = model_class.from_pretrained(
-            model_args.model_name_or_path,
-            config=config,
-            load_in_8bit=model_args.load_in_8bit,
-            low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
-            device_map=model_args.device_map,
-            trust_remote_code=model_args.trust_remote_code,
-            empty_init=False,   # https://github.com/THUDM/ChatGLM-6B/issues/530   #### chatglm2 must have this line to use deepspeed
-            quantization_config=BitsAndBytesConfig(
+        if model_args.model_type =="chatglm":  ## ADDD 20230730
+            model = model_class.from_pretrained(
+                model_args.model_name_or_path,
+                config=config,
+                load_in_8bit=model_args.load_in_8bit,
+                low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
+                device_map=model_args.device_map,
+                trust_remote_code=model_args.trust_remote_code,
+                empty_init=False,   这个参数只有chatglm才有 其他model没有 # https://github.com/THUDM/ChatGLM-6B/issues/530   #### chatglm2 must have this line to use deepspeed
+                quantization_config=BitsAndBytesConfig(
                 load_in_4bit=True,
                 bnb_4bit_use_double_quant=True,
                 bnb_4bit_quant_type="nf4",
                 bnb_4bit_compute_dtype=torch_dtype,
-            ) if training_args.qlora else None,
-        )
+                ) if training_args.qlora else None,
+            )
+        else :
+            model = model_class.from_pretrained(
+                model_args.model_name_or_path,
+                config=config,
+                load_in_8bit=model_args.load_in_8bit,
+                low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
+                device_map=model_args.device_map,
+                trust_remote_code=model_args.trust_remote_code,
+                #empty_init=False,  # 这个参数只有chatglm才有 其他model没有  # https://github.com/THUDM/ChatGLM-6B/issues/530   #### chatglm2 must have this line to use deepspeed
+                quantization_config=BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_compute_dtype=torch_dtype,
+                ) if training_args.qlora else None,
+            )
         if hasattr(model, 'lm_head'):
             model.lm_head = CastOutputToFloat(model.lm_head)
+        if hasattr(model, 'output_layer'):  ##add chatglm 最后一层使用的是 output_layer 名字
+            model.output_layer = CastOutputToFloat(model.output_layer)
     else:
         raise ValueError(f"Error, model_name_or_path is None, SFT must be loaded from a pre-trained model")
     logger.info(f'memory footprint of base model: {model.get_memory_footprint()/(1024*1024*1024)} GB')
