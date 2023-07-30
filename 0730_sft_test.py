@@ -784,10 +784,10 @@ def main():
                     logger.warning(f"bug conversation is = {conversation}")
                     #raise ValueError("test bug")
                     count_bad += 1
-            if count_ok>5 and count_bad >5 :
-                raise Error("stop here")
+            #if count_ok>5 and count_bad >5 :  ##我自己加的输出几个样例观察　答到５个就停
+            #    raise ValueError("stop here")
                     
-
+　　　　logger.error(f"ok_samples_num = {count_ok}\nbad_samples_num = {count_bad}")
         return dict(
             input_ids=input_ids,
             labels=targets,
