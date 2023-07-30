@@ -28,6 +28,7 @@ from datasets import load_dataset
 from loguru import logger
 from peft import LoraConfig, TaskType, get_peft_model, PeftModel, prepare_model_for_int8_training,prepare_model_for_kbit_training
 from transformers import (
+is_torch_tpu_available,
     AutoConfig,
     BloomForCausalLM,
     AutoModel,
