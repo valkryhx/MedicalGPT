@@ -22,7 +22,7 @@ import os
 from dataclasses import dataclass, field
 from glob import glob
 from typing import List, Sequence, Optional, Dict
-
+from sklearn.metrics import accuracy_score
 import torch
 from datasets import load_dataset
 from loguru import logger
