@@ -58,6 +58,11 @@ MODEL_CLASSES = {
     "auto": (AutoConfig, AutoModelForCausalLM, AutoTokenizer),
 }
 
+class CastOutputToFloat(torch.nn.Sequential):
+    """Cast the output of the model to float"""
+
+    def forward(self, x):
+        return super().forward(x).to(torch.float32)
 
 @dataclass
 class ModelArguments:
