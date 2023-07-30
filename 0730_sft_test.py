@@ -773,7 +773,8 @@ def main():
             
             if cur_len < tokenizer.model_max_length:
                 if cur_len == total_len:
-                    logger.warning(f"tokenization right match: {cur_len} vs. {total_len}. (ok)")
+                    #正常的比较多 就不打印了
+                    #logger.warning(f"tokenization right match: {cur_len} vs. {total_len}. (ok)")
                     #logger.info(f"valid conversation is = {conversation}")
                     #raise ValueError("test valid")
                     count_ok += 1
