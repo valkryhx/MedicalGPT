@@ -816,8 +816,8 @@ def main():
                 target[cur_len: cur_len + instruction_len] = IGNORE_INDEX
                 cur_len += turn_len
 
-            #if model_args.model_type =='chatglm':  ## add 0730  这儿处理好像会错位 改到上面处理
-            #    cur_len +=2                        ## add 0730
+            if model_args.model_type =='chatglm':  ## add 0730  这儿处理好像会错位 改到上面处理
+                cur_len +=2                        ## add 0730
                 
             target[cur_len:] = IGNORE_INDEX
 
