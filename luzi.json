@@ -6,7 +6,7 @@
     "output_dir":"out/1234",
     "num_train_epochs": 6,
     "lr_scheduler_type": "cosine",
-    "learning_rate" : 2e-5 ,
+    "learning_rate" : 1e-4 ,
     "warmup_ratio": 0.1,
     "logging_steps": 10,
     "save_strategy": "steps",
@@ -15,7 +15,7 @@
     "evaluation_strategy": "steps",
     "eval_steps": 10,
     "optim": "adamw_torch",
-    "fp16": true,
+    "fp16": false,
     "remove_unused_columns": false,
     "ddp_find_unused_parameters": false,
     "seed": 52,
@@ -26,6 +26,7 @@
     "ddp_timeout" : 6000 ,
     "logging_first_step" : true ,
     "gradient_checkpointing" :  true ,
+    "weight_decay" :1e-4 ,
 
     
  
