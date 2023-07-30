@@ -449,43 +449,78 @@ def main():
         logger.info(f"world_size={world_size} , ddp={ddp}")
         if world_size > 1:
             model_args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
-        if training_args.qlora: # 启用qlora    ##########20230725 ADD
-            logger.info(f'training_args.qlora: {training_args.qlora}')
-            # Quantization
-            q_config = BitsAndBytesConfig(load_in_4bit=True,
-                                  bnb_4bit_quant_type='nf4',
-                                  bnb_4bit_use_double_quant=True,
-                                  bnb_4bit_compute_dtype=torch.float16 ,#_compute_dtype_map[model_args.compute_dtype]
-                                         )
-            model = model_class.from_pretrained(
-                                  model_args.model_name_or_path,
-                                  load_in_4bit=model_args.load_in_4bit,
-                                  quantization_config=q_config,
-                                  cache_dir=model_args.cache_dir,
-                                  torch_dtype=torch_dtype,
-                                  device_map=model_args.device_map,
-                                  trust_remote_code=model_args.trust_remote_code,
+        # if training_args.qlora: # 启用qlora    ##########20230725 ADD
+        #     logger.info(f'training_args.qlora: {training_args.qlora}')
+        #     # Quantization
+        #     q_config = BitsAndBytesConfig(load_in_4bit=True,
+        #                           bnb_4bit_quant_type='nf4',
+        #                           bnb_4bit_use_double_quant=True,
+        #                           bnb_4bit_compute_dtype=torch.float16 ,#_compute_dtype_map[model_args.compute_dtype]
+        #                                  )
+        #     model = model_class.from_pretrained(
+        #                           model_args.model_name_or_path,
+        #                           load_in_4bit=model_args.load_in_4bit,
+        #                           quantization_config=q_config,
+        #                           cache_dir=model_args.cache_dir,
+        #                           torch_dtype=torch_dtype,
+        #                           device_map=model_args.device_map,
+        #                           trust_remote_code=model_args.trust_remote_code,
                 
-                                  # empty_init这是最关键的参数 如果不设置 那即使用deepspeed也oom
-                                  # 当您使用 AutoModel.from_pretrained() 方法加载预训练模型时，模型权重会被存储在 PyTorch 的 nn.Parameter 对象中。
-                                  # 在没有指定 empty_init=False 参数时，nn.Parameter 对象的值将被初始化为全零的张量。
-                                  # 但是，由于 nn.Parameter 对象不是真正的张量，而是具有元数据的张量包装器，因此无法将这些对象直接复制到 DeepSpeed 使用的元数据张量中。
-                                  # 在指定 empty_init=False 参数后，nn.Parameter 对象将被初始化为包含预训练权重的张量，
-                                  # 这使得 DeepSpeed 能够正常地将权重复制到元数据张量中
-                                  # THUDM/chatglm2 估计modeling_chatglm.py 默认是True  好坑！
-                                  # 果然 一查真的是 https://huggingface.co/THUDM/chatglm2-6b/blob/main/modeling_chatglm.py#L732
+        #                           # empty_init这是最关键的参数 如果不设置 那即使用deepspeed也oom
+        #                           # 当您使用 AutoModel.from_pretrained() 方法加载预训练模型时，模型权重会被存储在 PyTorch 的 nn.Parameter 对象中。
+        #                           # 在没有指定 empty_init=False 参数时，nn.Parameter 对象的值将被初始化为全零的张量。
+        #                           # 但是，由于 nn.Parameter 对象不是真正的张量，而是具有元数据的张量包装器，因此无法将这些对象直接复制到 DeepSpeed 使用的元数据张量中。
+        #                           # 在指定 empty_init=False 参数后，nn.Parameter 对象将被初始化为包含预训练权重的张量，
+        #                           # 这使得 DeepSpeed 能够正常地将权重复制到元数据张量中
+        #                           # THUDM/chatglm2 估计modeling_chatglm.py 默认是True  好坑！
+        #                           # 果然 一查真的是 https://huggingface.co/THUDM/chatglm2-6b/blob/main/modeling_chatglm.py#L732
                                   
-                                  #empty_init=False,   # https://github.com/THUDM/ChatGLM-6B/issues/530 
-                                 )  
-        else :     
+        #                           #empty_init=False,   # https://github.com/THUDM/ChatGLM-6B/issues/530 
+        #                          )  
+        # else :     
+        #     model = model_class.from_pretrained(
+        #                          model_args.model_name_or_path,
+        #                          load_in_8bit=model_args.load_in_8bit,
+        #                          cache_dir=model_args.cache_dir,
+        #                          torch_dtype=torch_dtype,
+        #                          device_map=model_args.device_map,
+        #                          trust_remote_code=model_args.trust_remote_code,
+        #                          )
+
+        # 从sft代码中借用  ## add 20230730
+        if model_args.model_type =="chatglm":  ## ADDD 20230730
             model = model_class.from_pretrained(
-                                 model_args.model_name_or_path,
-                                 load_in_8bit=model_args.load_in_8bit,
-                                 cache_dir=model_args.cache_dir,
-                                 torch_dtype=torch_dtype,
-                                 device_map=model_args.device_map,
-                                 trust_remote_code=model_args.trust_remote_code,
-                                 )
+                model_args.model_name_or_path,
+                config=config,
+                load_in_8bit=model_args.load_in_8bit,
+                low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
+                device_map=model_args.device_map,
+                trust_remote_code=model_args.trust_remote_code,
+                empty_init=False,   #这个参数只有chatglm才有 其他model没有 # https://github.com/THUDM/ChatGLM-6B/issues/530   #### chatglm2 must have this line to use deepspeed
+                quantization_config=BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_compute_dtype=torch.float16 ,#torch_dtype,
+                ) if training_args.qlora else None,
+            )
+        else :
+            model = model_class.from_pretrained(
+                model_args.model_name_or_path,
+                config=config,
+                load_in_8bit=model_args.load_in_8bit,
+                low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
+                device_map=model_args.device_map,
+                trust_remote_code=model_args.trust_remote_code,
+                #empty_init=False,  # 这个参数只有chatglm才有 其他model没有  # https://github.com/THUDM/ChatGLM-6B/issues/530   #### chatglm2 must have this line to use deepspeed
+                quantization_config=BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_compute_dtype=torch.float16 , #torch_dtype,
+                ) if training_args.qlora else None,
+            )
+        
         if hasattr(model, 'lm_head'):
             model.lm_head = CastOutputToFloat(model.lm_head)
         if hasattr(model, 'output_layer'):    ##########modify 20230725 chatglm2 最后一层是output_layer chatglm是lm_head
