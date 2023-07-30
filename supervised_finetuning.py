@@ -95,7 +95,7 @@ class ModelArguments:
         metadata={"help": "Whether to use one of the fast tokenizer (backed by the tokenizers library) or not."},
     )
     torch_dtype: Optional[str] = field(
-        default="float16",
+        default="float32",   ###改成float32 看看能否避免eval loss为NaN的问题
         metadata={
             "help": (
                 "Override the default `torch.dtype` and load the model under this dtype. If `auto` is passed, the "
