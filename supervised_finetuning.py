@@ -748,19 +748,23 @@ def main():
 
             target[cur_len:] = IGNORE_INDEX
          
-            
+            count_ok =0
+            count_bad =0
             if cur_len < tokenizer.model_max_length:
                 if cur_len == total_len:
                     logger.warning(f"tokenization right match: {cur_len} vs. {total_len}. (ok)")
-                    logger.warning(f"valid conversation is = {conversation}")
-                    raise ValueError("test valid")
+                    logger.info(f"valid conversation is = {conversation}")
+                    #raise ValueError("test valid")
+                    count_ok += 1
                 
                 elif cur_len != total_len:
                     target[:] = IGNORE_INDEX
                     logger.warning(f"tokenization mismatch: {cur_len} vs. {total_len}. (ignored)")
                     logger.warning(f"bug conversation is = {conversation}")
                     #raise ValueError("test bug")
-                
+                    count_bad += 1
+            if count_ok>5 and count_bad >5 :
+                raise Error("stop here")
                     
 
         return dict(
