@@ -724,6 +724,9 @@ def main():
 
         # Mask targets. Only compute loss on the assistant outputs.
         sep = conv.sep + conv.roles[1] + ": "
+
+        count_ok =0
+        count_bad =0
         for conversation, target in zip(conversations, targets):
             total_len = int(target.ne(tokenizer.pad_token_id).sum())
 
@@ -748,8 +751,7 @@ def main():
 
             target[cur_len:] = IGNORE_INDEX
          
-            count_ok =0
-            count_bad =0
+            
             if cur_len < tokenizer.model_max_length:
                 if cur_len == total_len:
                     logger.warning(f"tokenization right match: {cur_len} vs. {total_len}. (ok)")
