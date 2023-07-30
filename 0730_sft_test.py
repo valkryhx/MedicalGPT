@@ -794,9 +794,11 @@ def main():
                 target[cur_len: cur_len + instruction_len] = IGNORE_INDEX
                 cur_len += turn_len
 
+            if model_args.model_type =='chatglm':  ## add 0730
+                cur_len +=2                        ## add 0730
+                
             target[cur_len:] = IGNORE_INDEX
-         
-            
+
             if cur_len < tokenizer.model_max_length:
                 if cur_len == total_len:
                     #正常的比较多 就不打印了
