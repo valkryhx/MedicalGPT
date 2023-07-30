@@ -182,7 +182,7 @@ class PeftArguments(TrainingArguments):
     qlora: bool = field(default=False, metadata={"help": "Whether to use qlora"})
 
 
-class CastOutputToFloat(torch.nn.Sequential):
+class CastOutputToFloat(torch.nn.Sequential):  ##add 20230730 from sft.py 
     """Cast the output of the model to float"""
 
     def forward(self, x):
