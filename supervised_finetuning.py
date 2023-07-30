@@ -752,8 +752,8 @@ def main():
                 if cur_len != total_len:
                     target[:] = IGNORE_INDEX
                     logger.warning(f"tokenization mismatch: {cur_len} vs. {total_len}. (ignored)")
-                    logger.warning(f"bug turn is = {turn}")
-                    raise ValueError("test bug turn")
+                    logger.warning(f"bug conversation is = {conversation}")
+                    raise ValueError("test bug")
                 
                     
 
