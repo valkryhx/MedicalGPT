@@ -15,7 +15,7 @@
     "evaluation_strategy": "steps",
     "eval_steps": 10,
     "optim": "adamw_torch",
-    "fp16": true,
+    "fp16": false,
     "remove_unused_columns": false,
     "ddp_find_unused_parameters": false,
     "seed": 52,
