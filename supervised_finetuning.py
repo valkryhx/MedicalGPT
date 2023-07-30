@@ -212,6 +212,30 @@ class CastOutputToFloat(torch.nn.Sequential):
         return super().forward(x).to(torch.float32)
 
 
+
+def accuracy(predictions, references, normalize=True, sample_weight=None):   ## add from pretraining.py 0730
+    return {
+        "accuracy": float(accuracy_score(references, predictions, normalize=normalize, sample_weight=sample_weight))
+    }
+
+
+def compute_metrics(eval_preds):   ## add from pretraining.py 0730
+    preds, labels = eval_preds
+    # preds have the same shape as the labels, after the argmax(-1) has been calculated
+    # by preprocess_logits_for_metrics, we need to shift the labels
+    labels = labels[:, 1:].reshape(-1)
+    preds = preds[:, :-1].reshape(-1)
+    return accuracy(predictions=preds, references=labels)
+
+
+def preprocess_logits_for_metrics(logits, labels):  ## add from pretraining.py 0730
+    if isinstance(logits, tuple):
+        # Depending on the model and config, logits may contain extra tensors,
+        # like past_key_values, but logits always come first
+        logits = logits[0]
+    return logits.argmax(dim=-1)
+
+
 class SavePeftModelTrainer(Trainer):
     """
     Trainer for lora models
@@ -541,6 +565,8 @@ def main():
         eval_dataset=eval_dataset if training_args.do_eval else None,
         tokenizer=tokenizer,
         data_collator=data_collator,
+        compute_metrics=compute_metrics if training_args.do_eval and not is_torch_tpu_available() else None,
+        preprocess_logits_for_metrics=preprocess_logits_for_metrics if training_args.do_eval and not is_torch_tpu_available() else None,
     )
 
     # Training
