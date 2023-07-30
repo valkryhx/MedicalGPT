@@ -809,8 +809,8 @@ def main():
                 # "-2" is hardcoded for the LLaMA tokenizer to make the offset correct.
                 instruction_len = len(tokenizer(parts[0]).input_ids) - 2
                 
-                 if model_args.model_type =='chatglm':  ## add 0730  在这儿处理试试
-                    instruction_len +=2                 ## add 0730
+               if model_args.model_type =='chatglm':  ## add 0730  在这儿处理试试
+                   instruction_len +=2                 ## add 0730
 
                 # Ignore the user instructions
                 target[cur_len: cur_len + instruction_len] = IGNORE_INDEX
