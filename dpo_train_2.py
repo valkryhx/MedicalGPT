@@ -496,9 +496,10 @@ def main():
     )
 
     # Initialize DPO trainer
-    target_modules = args.target_modules.split(',') if args.target_modules else None
-    if target_modules and 'all' in target_modules:
-        target_modules = find_all_linear_names(model, int4=args.load_in_4bit, int8=args.load_in_8bit)
+    # target_modules = args.target_modules.split(',') if args.target_modules else None
+    # if target_modules and 'all' in target_modules:
+    #     target_modules = find_all_linear_names(model, int4=args.load_in_4bit, int8=args.load_in_8bit)
+    target_modules = find_all_linear_names(model)
     logger.info(f"Peft target_modules: {target_modules}")
     peft_config = LoraConfig(
         task_type=TaskType.CAUSAL_LM,
