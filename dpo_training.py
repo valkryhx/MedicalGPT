@@ -411,7 +411,8 @@ def main():
     #     ) if args.qlora else None,
     # )
     model_ref=copy.deepcopy(model).to("cuda:1")
-
+    logger.error(f"id(model)={id(model)}")
+    logger.error(f"id(model_ref)={id(model_ref)}")
     # Initialize our Trainer
     if args.gradient_checkpointing:
         model.gradient_checkpointing_enable()
