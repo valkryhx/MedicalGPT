@@ -473,6 +473,8 @@ def main():
     else:
         model.config.use_cache = True
 
+    model.enable_input_require_grads() #不启用 的话 各种NaN {'loss': 0.0, 'learning_rate': 2.4000000000000003e-06, 'rewards/chosen': nan, 'rewards/rejected': nan, 'rewards/accuracies': 0.0, 'rewards/margins': nan, 'logps/rejected': nan, 'logps/chosen': nan, 'logits/rejected': nan, 'logits/chosen': nan, 'epoch': 4.0}
+    
     training_args = TrainingArguments(
         per_device_train_batch_size=args.per_device_train_batch_size,
         per_device_eval_batch_size=args.per_device_eval_batch_size,
