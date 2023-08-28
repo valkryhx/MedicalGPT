@@ -882,7 +882,7 @@ def main():
         tokenizer=tokenizer,
         peft_config=peft_config ,#if args.use_peft else None,
         max_prompt_length=args.max_source_length,
-        max_length=full_max_length,
+        max_length=400,#full_max_length,
     )
    
     trainer.train()
