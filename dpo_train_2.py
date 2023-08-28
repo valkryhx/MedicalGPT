@@ -265,7 +265,7 @@ def main():
     }
     tokenizer_name_or_path = args.tokenizer_name_or_path
     if not tokenizer_name_or_path:
-        tokenizer_name_or_path = args.model_name_or_path
+        tokenizer_name_or_path = "THUDM/chatglm2-6b"    ##args.model_name_or_path  20230828
     tokenizer = tokenizer_class.from_pretrained(tokenizer_name_or_path, **tokenizer_kwargs)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = 0  # set as the <unk> token
