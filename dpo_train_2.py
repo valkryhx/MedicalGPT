@@ -786,11 +786,14 @@ def main():
     peft_config = LoraConfig(
         task_type=TaskType.CAUSAL_LM,
         target_modules=target_modules,
-        inference_mode=False,
+        #inference_mode=False,
         r=args.lora_rank,
+        bias="none",
         lora_alpha=args.lora_alpha,
         lora_dropout=args.lora_dropout,
     )
+   
+    
     trainer = MyDPOTrainer(
         model,
         ref_model=None,#model_ref,
@@ -799,35 +802,41 @@ def main():
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         tokenizer=tokenizer,
-        peft_config=peft_config if args.use_peft else None,
+        peft_config=peft_config ,#if args.use_peft else None,
         max_prompt_length=args.max_source_length,
         max_length=full_max_length,
     )
-    print_trainable_parameters(trainer.model)
+   
+    trainer.train()
 
-    # Training
-    if args.do_train:
-        logger.info("*** Train ***")
-        train_result = trainer.train()
-        metrics = train_result.metrics
-        metrics["train_samples"] = max_train_samples
-        logger.debug(f"Training metrics: {metrics}")
-        trainer.log_metrics("train", metrics)
-        trainer.save_metrics("train", metrics)
-        trainer.save_state()
-        logger.info(f"Saving model checkpoint to {args.output_dir}")
-        trainer.save_model(args.output_dir)
-        tokenizer.save_pretrained(args.output_dir)
-        trainer.model.save_pretrained(args.output_dir)
 
-    # Evaluation
-    if args.do_eval and trainer.is_world_process_zero():
-        logger.info("*** Evaluate ***")
-        metrics = trainer.evaluate()
-        metrics["eval_samples"] = max_eval_samples
-        logger.debug(f"Eval metrics: {metrics}")
-        trainer.log_metrics("eval", metrics)
-        trainer.save_metrics("eval", metrics)
+
+
+    # print_trainable_parameters(trainer.model)
+
+    # # Training
+    # if args.do_train:
+    #     logger.info("*** Train ***")
+    #     train_result = trainer.train()
+    #     metrics = train_result.metrics
+    #     metrics["train_samples"] = max_train_samples
+    #     logger.debug(f"Training metrics: {metrics}")
+    #     trainer.log_metrics("train", metrics)
+    #     trainer.save_metrics("train", metrics)
+    #     trainer.save_state()
+    #     logger.info(f"Saving model checkpoint to {args.output_dir}")
+    #     trainer.save_model(args.output_dir)
+    #     tokenizer.save_pretrained(args.output_dir)
+    #     trainer.model.save_pretrained(args.output_dir)
+
+    # # Evaluation
+    # if args.do_eval and trainer.is_world_process_zero():
+    #     logger.info("*** Evaluate ***")
+    #     metrics = trainer.evaluate()
+    #     metrics["eval_samples"] = max_eval_samples
+    #     logger.debug(f"Eval metrics: {metrics}")
+    #     trainer.log_metrics("eval", metrics)
+    #     trainer.save_metrics("eval", metrics)
 
 
 if __name__ == "__main__":
