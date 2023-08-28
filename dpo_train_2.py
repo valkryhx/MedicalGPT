@@ -716,7 +716,22 @@ def main():
         
     # ).to("cuda:0")
 
-    q_config = BitsAndBytesConfig(load_in_4bit=True,
+    # q_config = BitsAndBytesConfig(load_in_4bit=True,
+    #                           bnb_4bit_quant_type='nf4',
+    #                           bnb_4bit_use_double_quant=True,
+    #                           bnb_4bit_compute_dtype=torch.float16)
+    # model = AutoPeftModelForCausalLM.from_pretrained(
+    #     args.model_name_or_path,
+    #     low_cpu_mem_usage=True,
+    #     torch_dtype=torch.float16,
+    #     load_in_4bit=True,
+    #     #device_map='auto',
+    #     quantization_config = q_config, # add q_config here for qlora
+    #     trust_remote_code = True,
+        
+    # ).to("cuda:0")
+
+    q_config = q_config = BitsAndBytesConfig(load_in_4bit=True,
                               bnb_4bit_quant_type='nf4',
                               bnb_4bit_use_double_quant=True,
                               bnb_4bit_compute_dtype=torch.float16)
@@ -727,11 +742,14 @@ def main():
         load_in_4bit=True,
         #device_map='auto',
         quantization_config = q_config, # add q_config here for qlora
-        trust_remote_code = True,
-        
+        trust_remote_code = True,    
     ).to("cuda:0")
-
     
+    # now model is a peftmodel
+    model.config.use_cache = False
+    model.gradient_checkpointing_enable() 
+    model.enable_input_require_grads()
+   
     # model_ref = model_class.from_pretrained(
     #     args.model_name_or_path,
     #     config=config,
@@ -751,13 +769,13 @@ def main():
     logger.error(f"id(model)={id(model)}")
     #logger.error(f"id(model_ref)={id(model_ref)}")
     # Initialize our Trainer
-    if args.gradient_checkpointing:
-        model.gradient_checkpointing_enable()
-        model.config.use_cache = False
-    else:
-        model.config.use_cache = True
+    # if args.gradient_checkpointing:
+    #     model.gradient_checkpointing_enable()
+    #     model.config.use_cache = False
+    # else:
+    #     model.config.use_cache = True
 
-    model.enable_input_require_grads() #不启用 的话 各种NaN {'loss': 0.0, 'learning_rate': 2.4000000000000003e-06, 'rewards/chosen': nan, 'rewards/rejected': nan, 'rewards/accuracies': 0.0, 'rewards/margins': nan, 'logps/rejected': nan, 'logps/chosen': nan, 'logits/rejected': nan, 'logits/chosen': nan, 'epoch': 4.0}
+    # model.enable_input_require_grads() #不启用 的话 各种NaN {'loss': 0.0, 'learning_rate': 2.4000000000000003e-06, 'rewards/chosen': nan, 'rewards/rejected': nan, 'rewards/accuracies': 0.0, 'rewards/margins': nan, 'logps/rejected': nan, 'logps/chosen': nan, 'logits/rejected': nan, 'logits/chosen': nan, 'epoch': 4.0}
     # logger.info("prepare_model_for_kbit_training...")
     # model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
     
