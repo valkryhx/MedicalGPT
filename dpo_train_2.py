@@ -813,18 +813,18 @@ def main():
     # 2. Load the Stack-exchange paired dataset
     
     train_dataset = get_stack_exchange_paired("/kaggle/working/MedicalGPT/data/reward_yunguan/paired_yunguan.json", sanity_check=False)
-    train_dataset = train_dataset.filter(
-        lambda x: len(x["prompt"]) + len(x["chosen"]) <= 128
-        and len(x["prompt"]) + len(x["rejected"]) <= 400
-    )
+    # train_dataset = train_dataset.filter(
+    #     lambda x: len(x["prompt"]) + len(x["chosen"]) <= 128
+    #     and len(x["prompt"]) + len(x["rejected"]) <= 400
+    # )
     logger.info(f"123train_dataset={train_dataset}")
     # 3. Load evaluation dataset
     #eval_dataset = get_stack_exchange_paired(data_dir="data/evaluation", sanity_check=True)
     eval_dataset = get_stack_exchange_paired("/kaggle/working/MedicalGPT/data/reward_yunguan/paired_yunguan.json", sanity_check=True)
-    eval_dataset = eval_dataset.filter(
-        lambda x: len(x["prompt"]) + len(x["chosen"]) <= 128
-        and len(x["prompt"]) + len(x["rejected"]) <= 400
-    )
+    # eval_dataset = eval_dataset.filter(
+    #     lambda x: len(x["prompt"]) + len(x["chosen"]) <= 128
+    #     and len(x["prompt"]) + len(x["rejected"]) <= 400
+    # )
     logger.info(f"234eval_dataset={eval_dataset}")
 
 
