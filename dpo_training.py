@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from glob import glob
 from typing import Dict, Optional
 
+import copy
 import torch
 from datasets import load_dataset
 from loguru import logger
@@ -387,7 +388,7 @@ def main():
         args.model_name_or_path,
         config=config,
         low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
-        device_map=args.device_map,
+        #device_map=args.device_map,
         trust_remote_code=args.trust_remote_code,
         quantization_config=BitsAndBytesConfig(
             load_in_4bit=True,
@@ -395,20 +396,21 @@ def main():
             bnb_4bit_quant_type="nf4",
             bnb_4bit_compute_dtype=torch_dtype,
         ) if args.qlora else None,
-    )
-    model_ref = model_class.from_pretrained(
-        args.model_name_or_path,
-        config=config,
-        low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
-        device_map=args.device_map,
-        trust_remote_code=args.trust_remote_code,
-        quantization_config=BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch_dtype,
-        ) if args.qlora else None,
-    )
+    )to("cuda:0")
+    # model_ref = model_class.from_pretrained(
+    #     args.model_name_or_path,
+    #     config=config,
+    #     low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
+    #     device_map=args.device_map,
+    #     trust_remote_code=args.trust_remote_code,
+    #     quantization_config=BitsAndBytesConfig(
+    #         load_in_4bit=True,
+    #         bnb_4bit_use_double_quant=True,
+    #         bnb_4bit_quant_type="nf4",
+    #         bnb_4bit_compute_dtype=torch_dtype,
+    #     ) if args.qlora else None,
+    # )
+    model_ref=copy.deepcopy(model).to("cuda:1")
 
     # Initialize our Trainer
     if args.gradient_checkpointing:
