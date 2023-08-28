@@ -396,7 +396,7 @@ def main():
             bnb_4bit_quant_type="nf4",
             bnb_4bit_compute_dtype=torch_dtype,
         ) if args.qlora else None,
-    )to("cuda:0")
+    ).to("cuda:0")
     # model_ref = model_class.from_pretrained(
     #     args.model_name_or_path,
     #     config=config,
