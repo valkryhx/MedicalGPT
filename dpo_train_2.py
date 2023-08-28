@@ -795,18 +795,18 @@ def main():
             dataset = dataset.shuffle().select(range(min(len(dataset), 200)))
 
         def return_prompt_and_responses(samples) -> Dict[str, str]:
-        return {
-            "prompt": ["Question: " + question + "\n\nAnswer: " for question in samples["question"]],
-            "chosen": samples["response_j"],
-            "rejected": samples["response_k"],
+            return {
+                "prompt": ["Question: " + question + "\n\nAnswer: " for question in samples["question"]],
+                "chosen": samples["response_j"],
+                "rejected": samples["response_k"],
         }
 
         return dataset.map(
-        return_prompt_and_responses,
-        batched=True,
-        num_proc=num_proc,
-        remove_columns=original_columns,
-    )
+            return_prompt_and_responses,
+            batched=True,
+            num_proc=num_proc,
+            remove_columns=original_columns,
+        )
 
 
     
