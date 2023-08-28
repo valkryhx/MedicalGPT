@@ -31,6 +31,34 @@ from transformers import (
 from transformers.deepspeed import is_deepspeed_zero3_enabled
 from trl import DPOTrainer
 
+
+import os
+import torch.nn as nn
+from dataclasses import dataclass, field
+from trl.models.modeling_base import PreTrainedModelWrapper
+from collections import defaultdict
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Union,Sequence
+import copy # 用于把model 深拷贝一份 放到另外的gpu上作为ref_model
+from copy import deepcopy
+import torch
+from datasets import Dataset, load_dataset
+from peft import AutoPeftModelForCausalLM, LoraConfig, prepare_model_for_kbit_training,get_peft_model
+from transformers import (
+BatchEncoding,
+DataCollator, 
+PreTrainedModel, 
+PreTrainedTokenizerBase, 
+Trainer
+)
+from transformers.trainer_callback import TrainerCallback
+from trl.trainer.utils import DPODataCollatorWithPadding,disable_dropout_in_model
+import importlib
+def is_peft_available():
+    return importlib.util.find_spec("peft") is not None
+
+
+
+
 os.environ["TOKENIZERS_PARALLELISM"] = "FALSE"
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
@@ -247,6 +275,184 @@ def return_prompt_and_responses(examples) -> Dict[str, str]:
         "chosen": examples["response_chosen"],
         "rejected": examples["response_rejected"],
     }
+
+
+
+class MyDPOTrainer(DPOTrainer): 
+
+    def __init__(
+        self,
+        model: Union[PreTrainedModel, nn.Module] = None,
+        ref_model: Optional[Union[PreTrainedModel, nn.Module]] = None,
+        beta: float = 0.1,
+        args: TrainingArguments = None,
+        data_collator: Optional[DataCollator] = None,
+        label_pad_token_id: int = -100,
+        padding_value: int = 0,
+        truncation_mode: str = "keep_end",
+        train_dataset: Optional[Dataset] = None,
+        eval_dataset: Optional[Union[Dataset, Dict[str, Dataset]]] = None,
+        tokenizer: Optional[PreTrainedTokenizerBase] = None,
+        model_init: Optional[Callable[[], PreTrainedModel]] = None,
+        callbacks: Optional[List[TrainerCallback]] = None,
+        optimizers: Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler.LambdaLR] = (
+            None,
+            None,
+        ),
+        preprocess_logits_for_metrics: Optional[Callable[[torch.Tensor, torch.Tensor], torch.Tensor]] = None,
+        max_length: Optional[int] = None,
+        max_prompt_length: Optional[int] = None,
+        peft_config: Optional[Dict] = None,
+        disable_dropout: bool = True,
+    ):
+        if not is_peft_available() and peft_config is not None:
+            raise ValueError(
+                "PEFT is not installed and you passed a `peft_config` in the trainer's kwargs, please install it to use the PEFT models"
+            )
+        elif is_peft_available() and peft_config is not None:
+            if getattr(model, "is_loaded_in_8bit", False) or getattr(model, "is_loaded_in_4bit", False):
+                #model = prepare_model_for_int8_training(model)
+                logger.error(" in  myDPOtrainer code : prepare_model_for_kbit_training...")
+                model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)    
+            model = get_peft_model(model, peft_config)
+            model.print_trainable_parameters()
+
+        self.is_peft_model = getattr(model, "is_peft_model", False)
+        logger.error(f"self.is_peft_model={self.is_peft_model}")
+        if ref_model:
+            logger.error(f"has ref_model?={ref_model}")
+            self.ref_model = ref_model
+        elif self.is_peft_model:
+            # The `model` with adapters turned off will be used as the reference model
+            self.ref_model = None
+        else:
+            logger.error("create ref model on cuda 1")
+            self.ref_model = create_reference_model(model).to("cuda:1")
+
+        if data_collator is None:
+            if tokenizer is None:
+                raise ValueError(
+                    "max_length or a tokenizer must be specified when using the default DPODataCollatorWithPadding"
+                )
+            if max_length is None:
+                warnings.warn(
+                    "When using DPODataCollatorWithPadding, you should set `max_length` in the DPOTrainer's init"
+                    " it will be set to `512` by default, but you should do it yourself in the future.",
+                    UserWarning,
+                )
+                max_length = 512
+            if max_prompt_length is None:
+                warnings.warn(
+                    "When using DPODataCollatorWithPadding, you should set `max_prompt_length` in the DPOTrainer's init"
+                    " it will be set to `128` by default, but you should do it yourself in the future.",
+                    UserWarning,
+                )
+                max_prompt_length = 128
+
+            data_collator = DPODataCollatorWithPadding(
+                tokenizer,
+                max_length=max_length,
+                max_prompt_length=max_prompt_length,
+                label_pad_token_id=label_pad_token_id,
+                padding_value=padding_value,
+                truncation_mode=truncation_mode,
+            )
+
+            if args.remove_unused_columns:
+                args.remove_unused_columns = False
+                # warn users
+                warnings.warn(
+                    "When using DPODataCollatorWithPadding, you should set `remove_unused_columns=False` in your TrainingArguments"
+                    " we have set it for you, but you should do it yourself in the future.",
+                    UserWarning,
+                )
+
+            self.use_dpo_data_collator = True
+        else:
+            self.use_dpo_data_collator = False
+
+        if disable_dropout:
+            disable_dropout_in_model(model)
+            if self.ref_model is not None:
+                disable_dropout_in_model(self.ref_model)
+
+        self.label_pad_token_id = label_pad_token_id
+        self.padding_value = padding_value
+
+        self.beta = beta
+
+        self._stored_metrics = defaultdict(lambda: defaultdict(list))
+
+        super().__init__(
+            model=model,
+            args=args,
+            data_collator=data_collator,
+            train_dataset=train_dataset,
+            eval_dataset=eval_dataset,
+            tokenizer=tokenizer,
+            model_init=model_init,
+            ref_model=None,
+            callbacks=callbacks,
+            optimizers=optimizers,
+            preprocess_logits_for_metrics=preprocess_logits_for_metrics,
+        )
+
+        if not hasattr(self, "accelerator"):
+            raise AttributeError(
+                "Your `Trainer` does not have an `accelerator` object. Consider upgrading `transformers`."
+            )
+
+        if self.ref_model is None:
+            if not hasattr(
+                self.accelerator.unwrap_model(self.model).pretrained_model,
+                "disable_adapter",
+            ):
+                raise ValueError(
+                    "You are using a `peft` version that does not support `disable_adapter`. Please update your `peft` version to the latest version."
+                )
+        else:
+            self.ref_model = self.accelerator.prepare_model(self.ref_model, evaluation_mode=True) 
+
+    # not used
+    def concatenated_forward(
+        self, model: nn.Module, batch: Dict[str, Union[List, torch.LongTensor]]
+    ) -> Tuple[torch.FloatTensor, torch.FloatTensor, torch.FloatTensor, torch.FloatTensor]:
+        """Run the given model on the given batch of inputs, concatenating the chosen and rejected inputs together.
+
+        We do this to avoid doing two forward passes, because it's faster for FSDP.
+        """
+        concatenated_batch = self.concatenated_inputs(batch)
+        all_logits = model(
+            concatenated_batch["concatenated_input_ids"],
+            attention_mask=concatenated_batch["concatenated_attention_mask"],
+        ).logits.to(torch.float16)  # 原始代码是torch.float32 这里为了减少GPU占用 改为半精度
+        all_logps = self._get_batch_logps(
+            all_logits,
+            concatenated_batch["concatenated_labels"],
+            average_log_prob=False,
+        )
+        chosen_logps = all_logps[: batch["chosen_input_ids"].shape[0]]
+        rejected_logps = all_logps[batch["chosen_input_ids"].shape[0] :]
+
+        chosen_logits = all_logits[: batch["chosen_input_ids"].shape[0]]
+        rejected_logits = all_logits[batch["chosen_input_ids"].shape[0] :]
+        return (chosen_logps, rejected_logps, chosen_logits, rejected_logits)
+
+    
+    
+    def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
+        """只保存adapter"""
+        logger.error("Begin to save...")
+        if output_dir is None:
+            output_dir = self.args.output_dir
+        if self.is_world_process_zero():  
+            self.model.save_pretrained(output_dir)
+            torch.save(self.args, os.path.join(output_dir, "training_args.bin"))
+            logger.error("Save done.")
+        else :
+            print("this process is not main process , do not save model.[for distributed training scenario]")
+
+
 
 
 def main():
@@ -513,7 +719,7 @@ def main():
         lora_alpha=args.lora_alpha,
         lora_dropout=args.lora_dropout,
     )
-    trainer = DPOTrainer(
+    trainer = MyDPOTrainer(
         model,
         model_ref,
         args=training_args,
