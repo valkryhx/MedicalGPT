@@ -771,8 +771,8 @@ def main():
         lr_scheduler_type=args.lr_scheduler_type,
         warmup_steps=args.warmup_steps,
         optim=args.optim,
-        bf16=args.bf16,
-        fp16=args.fp16,
+        bf16=False,#args.bf16,
+        fp16=True,#args.fp16,
         remove_unused_columns=args.remove_unused_columns,
         run_name=f"dpo_{args.model_type}",
     )
