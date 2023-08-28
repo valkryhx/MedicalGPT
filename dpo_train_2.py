@@ -378,12 +378,13 @@ def main():
         args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
     if args.qlora and is_deepspeed_zero3_enabled():
         logger.warning("ZeRO3 are both currently incompatible with QLoRA.")
-    config = config_class.from_pretrained(
-        args.model_name_or_path,
-        trust_remote_code=args.trust_remote_code,
-        torch_dtype=torch_dtype,
-        cache_dir=args.cache_dir
-    )
+    
+    # config = config_class.from_pretrained(
+    #     args.model_name_or_path,
+    #     trust_remote_code=args.trust_remote_code,
+    #     torch_dtype=torch_dtype,
+    #     cache_dir=args.cache_dir
+    # )
     # model = model_class.from_pretrained(
     #     args.model_name_or_path,
     #     config=config,
