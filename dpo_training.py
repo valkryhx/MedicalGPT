@@ -388,7 +388,7 @@ def main():
         args.model_name_or_path,
         config=config,
         low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
-        #device_map=args.device_map,
+        device_map=args.device_map,
         trust_remote_code=args.trust_remote_code,
         quantization_config=BitsAndBytesConfig(
             load_in_4bit=True,
