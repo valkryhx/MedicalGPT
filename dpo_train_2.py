@@ -530,22 +530,28 @@ def main():
     args = parser.parse_args_into_dataclasses()[0]
     logger.info(f"Parse args: {args}")
 
-    config_class, model_class, tokenizer_class = MODEL_CLASSES[args.model_type]
-    if args.model_type == 'bloom':
-        args.use_fast_tokenizer = True
-    # Load tokenizer
-    tokenizer_kwargs = {
-        "cache_dir": args.cache_dir,
-        "use_fast": args.use_fast_tokenizer,
-        "trust_remote_code": args.trust_remote_code,
-    }
-    tokenizer_name_or_path = args.tokenizer_name_or_path
-    if not tokenizer_name_or_path:
-        tokenizer_name_or_path = "THUDM/chatglm2-6b"    ##args.model_name_or_path  20230828
-    tokenizer = tokenizer_class.from_pretrained(tokenizer_name_or_path, **tokenizer_kwargs)
-    if tokenizer.pad_token_id is None:
-        tokenizer.pad_token_id = 0  # set as the <unk> token
-
+    # config_class, model_class, tokenizer_class = MODEL_CLASSES[args.model_type]
+    # if args.model_type == 'bloom':
+    #     args.use_fast_tokenizer = True
+    # # Load tokenizer
+    # tokenizer_kwargs = {
+    #     "cache_dir": args.cache_dir,
+    #     "use_fast": args.use_fast_tokenizer,
+    #     "trust_remote_code": args.trust_remote_code,
+    # }
+    # tokenizer_name_or_path = args.tokenizer_name_or_path
+    # if not tokenizer_name_or_path:
+    #     tokenizer_name_or_path = "THUDM/chatglm2-6b"    ##args.model_name_or_path  20230828
+    # tokenizer = tokenizer_class.from_pretrained(tokenizer_name_or_path, **tokenizer_kwargs)
+    # if tokenizer.pad_token_id is None:
+    #     tokenizer.pad_token_id = 0  # set as the <unk> token
+    
+    tokenizer_name_or_path = "THUDM/chatglm2-6b"
+   
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name_or_path,trust_remote_code=True)
+    
+    
+    #tokenizer.pad_token = tokenizer.eos_token  
     # Get datasets
     # if args.dataset_name is not None:
     #     # Downloading and loading a dataset from the hub.
