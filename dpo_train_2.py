@@ -812,7 +812,7 @@ def main():
     
     # 2. Load the Stack-exchange paired dataset
     
-    train_dataset = get_stack_exchange_paired("/kaggle/working/MedicalGPT/data/reward_yunguan/paired_yunguan.json", sanity_check=script_args.sanity_check)
+    train_dataset = get_stack_exchange_paired("/kaggle/working/MedicalGPT/data/reward_yunguan/paired_yunguan.json", sanity_check=False)
     train_dataset = train_dataset.filter(
         lambda x: len(x["prompt"]) + len(x["chosen"]) <= 128
         and len(x["prompt"]) + len(x["rejected"]) <= 400
