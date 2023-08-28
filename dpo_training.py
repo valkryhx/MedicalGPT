@@ -398,7 +398,7 @@ def main():
     #     ) if args.qlora else None,
     # ).to("cuda:0")
 
-    model = AutoPeftModelForCausalLM.from_pretrained(
+    model = AutoModel.from_pretrained(
         args.model_name_or_path,
         config=config,
         low_cpu_mem_usage=True,
