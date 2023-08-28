@@ -8,6 +8,7 @@ import os
 from dataclasses import dataclass, field
 from glob import glob
 from typing import Dict, Optional
+import bitsandbytes as bnb
 
 import copy
 import torch
@@ -209,6 +210,23 @@ def find_all_linear_names(peft_model, int4=False, int8=False):
             names = name.split('.')
             lora_module_names.add(names[0] if len(names) == 1 else names[-1])
     return sorted(lora_module_names)
+
+def find_all_linear_names(model):
+    """
+    找出所有全连接层，为所有全连接添加adapter
+    """
+    cls = bnb.nn.Linear4bit
+    lora_module_names = set()
+    for name, module in model.named_modules():
+        if isinstance(module, cls):
+            names = name.split('.')
+            lora_module_names.add(names[0] if len(names) == 1 else names[-1])
+
+    if 'lm_head' in lora_module_names:  # needed for 16-bit
+        lora_module_names.remove('lm_head')
+    if  'output_layer' in lora_module_names:
+        lora_module_names.remove('output_layer')
+    return list(lora_module_names)
 
 
 def return_prompt_and_responses(examples) -> Dict[str, str]:
