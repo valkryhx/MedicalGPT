@@ -669,9 +669,11 @@ def main():
     #         bnb_4bit_compute_dtype=torch_dtype,
     #     ) if args.qlora else None,
     # )
-    model_ref=copy.deepcopy(model).to("cuda:1")
+    
+    #model_ref=copy.deepcopy(model).to("cuda:1")
+    
     logger.error(f"id(model)={id(model)}")
-    logger.error(f"id(model_ref)={id(model_ref)}")
+    #logger.error(f"id(model_ref)={id(model_ref)}")
     # Initialize our Trainer
     if args.gradient_checkpointing:
         model.gradient_checkpointing_enable()
@@ -721,7 +723,7 @@ def main():
     )
     trainer = MyDPOTrainer(
         model,
-        model_ref,
+        ref_model=None,#model_ref,
         args=training_args,
         beta=args.beta,
         train_dataset=train_dataset,
