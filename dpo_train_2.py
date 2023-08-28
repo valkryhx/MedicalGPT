@@ -190,7 +190,7 @@ def print_trainable_parameters(model):
     )
 
 
-def find_all_linear_names(peft_model, int4=False, int8=False):
+def find_all_linear_names_old(peft_model, int4=False, int8=False):
     """Find all linear layer names in the model. reference from qlora paper."""
     cls = torch.nn.Linear
     if int4 or int8:
