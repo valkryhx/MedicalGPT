@@ -416,7 +416,10 @@ def main():
         
     # ).to("cuda:0")
 
-
+    q_config = q_config = BitsAndBytesConfig(load_in_4bit=True,
+                              bnb_4bit_quant_type='nf4',
+                              bnb_4bit_use_double_quant=True,
+                              bnb_4bit_compute_dtype=torch.float16)
     model = AutoPeftModelForCausalLM.from_pretrained(
         args.model_name_or_path,
         low_cpu_mem_usage=True,
