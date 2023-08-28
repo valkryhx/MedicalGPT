@@ -327,24 +327,24 @@ def find_all_linear_names(model):
     return list(lora_module_names)
 
 
-def return_prompt_and_responses(examples) -> Dict[str, str]:
-    """Load the paired dataset and convert it to the necessary format.
+# def return_prompt_and_responses(examples) -> Dict[str, str]:
+#     """Load the paired dataset and convert it to the necessary format.
 
-    The dataset is converted to a dictionary with the following structure:
-    {
-        'prompt': List[str],
-        'chosen': List[str],
-        'rejected': List[str],
-    }
+#     The dataset is converted to a dictionary with the following structure:
+#     {
+#         'prompt': List[str],
+#         'chosen': List[str],
+#         'rejected': List[str],
+#     }
 
-    Prompts are structured as follows:
-      "Question: " + <prompt> + "\n\nAnswer: "
-    """
-    return {
-        "prompt": ["Question: " + question + "\n\nAnswer: " for question in examples["question"]],
-        "chosen": examples["response_chosen"],
-        "rejected": examples["response_rejected"],
-    }
+#     Prompts are structured as follows:
+#       "Question: " + <prompt> + "\n\nAnswer: "
+#     """
+#     return {
+#         "prompt": ["Question: " + question + "\n\nAnswer: " for question in examples["question"]],
+#         "chosen": examples["response_chosen"],
+#         "rejected": examples["response_rejected"],
+#     }
 
 
 
@@ -547,131 +547,131 @@ def main():
         tokenizer.pad_token_id = 0  # set as the <unk> token
 
     # Get datasets
-    if args.dataset_name is not None:
-        # Downloading and loading a dataset from the hub.
-        raw_datasets = load_dataset(
-            args.dataset_name,
-            args.dataset_config_name,
-            cache_dir=args.cache_dir,
-        )
-        if "validation" not in raw_datasets.keys():
-            raw_datasets["validation"] = load_dataset(
-                args.dataset_name,
-                args.dataset_config_name,
-                split=f"train[:{args.validation_split_percentage}%]",
-                cache_dir=args.cache_dir,
-            )
-            raw_datasets["train"] = load_dataset(
-                args.dataset_name,
-                args.dataset_config_name,
-                split=f"train[{args.validation_split_percentage}%:]",
-                cache_dir=args.cache_dir,
-            )
-    else:
-        data_files = {}
-        if args.train_file_dir is not None and os.path.exists(args.train_file_dir):
-            train_data_files = glob(f'{args.train_file_dir}/**/*.json', recursive=True) + glob(
-                f'{args.train_file_dir}/**/*.jsonl', recursive=True)
-            logger.info(f"train files: {', '.join(train_data_files)}")
-            data_files["train"] = train_data_files
-        if args.validation_file_dir is not None and os.path.exists(args.validation_file_dir):
-            eval_data_files = glob(f'{args.validation_file_dir}/**/*.json', recursive=True) + glob(
-                f'{args.validation_file_dir}/**/*.jsonl', recursive=True)
-            logger.info(f"eval files: {', '.join(eval_data_files)}")
-            data_files["validation"] = eval_data_files
-        raw_datasets = load_dataset(
-            'json',
-            data_files=data_files,
-            cache_dir=args.cache_dir,
-        )
-        # If no validation data is there, validation_split_percentage will be used to divide the dataset.
-        if "validation" not in raw_datasets.keys():
-            raw_datasets["validation"] = load_dataset(
-                'json',
-                data_files=data_files,
-                split=f"train[:{args.validation_split_percentage}%]",
-                cache_dir=args.cache_dir,
-            )
-            raw_datasets["train"] = load_dataset(
-                'json',
-                data_files=data_files,
-                split=f"train[{args.validation_split_percentage}%:]",
-                cache_dir=args.cache_dir,
-            )
-    logger.info(f"Raw datasets: {raw_datasets}")
+    # if args.dataset_name is not None:
+    #     # Downloading and loading a dataset from the hub.
+    #     raw_datasets = load_dataset(
+    #         args.dataset_name,
+    #         args.dataset_config_name,
+    #         cache_dir=args.cache_dir,
+    #     )
+    #     if "validation" not in raw_datasets.keys():
+    #         raw_datasets["validation"] = load_dataset(
+    #             args.dataset_name,
+    #             args.dataset_config_name,
+    #             split=f"train[:{args.validation_split_percentage}%]",
+    #             cache_dir=args.cache_dir,
+    #         )
+    #         raw_datasets["train"] = load_dataset(
+    #             args.dataset_name,
+    #             args.dataset_config_name,
+    #             split=f"train[{args.validation_split_percentage}%:]",
+    #             cache_dir=args.cache_dir,
+    #         )
+    # else:
+    #     data_files = {}
+    #     if args.train_file_dir is not None and os.path.exists(args.train_file_dir):
+    #         train_data_files = glob(f'{args.train_file_dir}/**/*.json', recursive=True) + glob(
+    #             f'{args.train_file_dir}/**/*.jsonl', recursive=True)
+    #         logger.info(f"train files: {', '.join(train_data_files)}")
+    #         data_files["train"] = train_data_files
+    #     if args.validation_file_dir is not None and os.path.exists(args.validation_file_dir):
+    #         eval_data_files = glob(f'{args.validation_file_dir}/**/*.json', recursive=True) + glob(
+    #             f'{args.validation_file_dir}/**/*.jsonl', recursive=True)
+    #         logger.info(f"eval files: {', '.join(eval_data_files)}")
+    #         data_files["validation"] = eval_data_files
+    #     raw_datasets = load_dataset(
+    #         'json',
+    #         data_files=data_files,
+    #         cache_dir=args.cache_dir,
+    #     )
+    #     # If no validation data is there, validation_split_percentage will be used to divide the dataset.
+    #     if "validation" not in raw_datasets.keys():
+    #         raw_datasets["validation"] = load_dataset(
+    #             'json',
+    #             data_files=data_files,
+    #             split=f"train[:{args.validation_split_percentage}%]",
+    #             cache_dir=args.cache_dir,
+    #         )
+    #         raw_datasets["train"] = load_dataset(
+    #             'json',
+    #             data_files=data_files,
+    #             split=f"train[{args.validation_split_percentage}%:]",
+    #             cache_dir=args.cache_dir,
+    #         )
+    # logger.info(f"Raw datasets: {raw_datasets}")
 
-    # Preprocessing the datasets
-    max_source_length = args.max_source_length
-    max_target_length = args.max_target_length
-    full_max_length = max_source_length + max_target_length
+    # # Preprocessing the datasets
+    # max_source_length = args.max_source_length
+    # max_target_length = args.max_target_length
+    # full_max_length = max_source_length + max_target_length
 
-    # Preprocess the dataset
-    train_dataset = None
-    max_train_samples = 0
-    if args.do_train:
-        if "train" not in raw_datasets:
-            raise ValueError("--do_train requires a train dataset")
-        train_dataset = raw_datasets['train']
-        max_train_samples = len(train_dataset)
-        if args.max_train_samples is not None and args.max_train_samples > 0:
-            max_train_samples = min(len(train_dataset), args.max_train_samples)
-            train_dataset = train_dataset.select(range(max_train_samples))
-        logger.debug(f"Example train_dataset[0]: {train_dataset[0]}")
-        tokenized_dataset = train_dataset.shuffle().map(
-            return_prompt_and_responses,
-            batched=True,
-            num_proc=args.preprocessing_num_workers,
-            remove_columns=train_dataset.column_names,
-            load_from_cache_file=not args.overwrite_cache,
-            desc="Running tokenizer on dataset",
-        )
-        train_dataset = tokenized_dataset.filter(
-            lambda x: 0 < len(x['prompt'] + x['chosen']) <= full_max_length
-                      and 0 < len(x['prompt'] + x['rejected']) <= full_max_length
-        )
-        logger.debug(f"Num train_samples: {len(train_dataset)}")
-        logger.debug("First train example:")
-        logger.debug(train_dataset[0]['prompt'] + train_dataset[0]['chosen'])
+    # # Preprocess the dataset
+    # train_dataset = None
+    # max_train_samples = 0
+    # if args.do_train:
+    #     if "train" not in raw_datasets:
+    #         raise ValueError("--do_train requires a train dataset")
+    #     train_dataset = raw_datasets['train']
+    #     max_train_samples = len(train_dataset)
+    #     if args.max_train_samples is not None and args.max_train_samples > 0:
+    #         max_train_samples = min(len(train_dataset), args.max_train_samples)
+    #         train_dataset = train_dataset.select(range(max_train_samples))
+    #     logger.debug(f"Example train_dataset[0]: {train_dataset[0]}")
+    #     tokenized_dataset = train_dataset.shuffle().map(
+    #         return_prompt_and_responses,
+    #         batched=True,
+    #         num_proc=args.preprocessing_num_workers,
+    #         remove_columns=train_dataset.column_names,
+    #         load_from_cache_file=not args.overwrite_cache,
+    #         desc="Running tokenizer on dataset",
+    #     )
+    #     train_dataset = tokenized_dataset.filter(
+    #         lambda x: 0 < len(x['prompt'] + x['chosen']) <= full_max_length
+    #                   and 0 < len(x['prompt'] + x['rejected']) <= full_max_length
+    #     )
+    #     logger.debug(f"Num train_samples: {len(train_dataset)}")
+    #     logger.debug("First train example:")
+    #     logger.debug(train_dataset[0]['prompt'] + train_dataset[0]['chosen'])
 
-    eval_dataset = None
-    max_eval_samples = 0
-    if args.do_eval:
-        if "validation" not in raw_datasets:
-            raise ValueError("--do_eval requires a validation dataset")
-        eval_dataset = raw_datasets["validation"]
-        max_eval_samples = len(eval_dataset)
-        if args.max_eval_samples is not None and args.max_eval_samples > 0:
-            max_eval_samples = min(len(eval_dataset), args.max_eval_samples)
-            eval_dataset = eval_dataset.select(range(max_eval_samples))
-        logger.debug(f"Example eval_dataset[0]: {eval_dataset[0]}")
-        eval_dataset = eval_dataset.map(
-            return_prompt_and_responses,
-            batched=True,
-            num_proc=args.preprocessing_num_workers,
-            remove_columns=eval_dataset.column_names,
-            load_from_cache_file=not args.overwrite_cache,
-            desc="Running tokenizer on dataset",
-        )
-        eval_dataset = eval_dataset.filter(
-            lambda x: 0 < len(x['prompt'] + x['chosen']) <= full_max_length
-                      and 0 < len(x['prompt'] + x['rejected']) <= full_max_length
-        )
-        logger.debug(f"Num eval_samples: {len(eval_dataset)}")
-        logger.debug("First eval example:")
-        logger.debug(eval_dataset[0]['prompt'] + eval_dataset[0]['chosen'])
+    # eval_dataset = None
+    # max_eval_samples = 0
+    # if args.do_eval:
+    #     if "validation" not in raw_datasets:
+    #         raise ValueError("--do_eval requires a validation dataset")
+    #     eval_dataset = raw_datasets["validation"]
+    #     max_eval_samples = len(eval_dataset)
+    #     if args.max_eval_samples is not None and args.max_eval_samples > 0:
+    #         max_eval_samples = min(len(eval_dataset), args.max_eval_samples)
+    #         eval_dataset = eval_dataset.select(range(max_eval_samples))
+    #     logger.debug(f"Example eval_dataset[0]: {eval_dataset[0]}")
+    #     eval_dataset = eval_dataset.map(
+    #         return_prompt_and_responses,
+    #         batched=True,
+    #         num_proc=args.preprocessing_num_workers,
+    #         remove_columns=eval_dataset.column_names,
+    #         load_from_cache_file=not args.overwrite_cache,
+    #         desc="Running tokenizer on dataset",
+    #     )
+    #     eval_dataset = eval_dataset.filter(
+    #         lambda x: 0 < len(x['prompt'] + x['chosen']) <= full_max_length
+    #                   and 0 < len(x['prompt'] + x['rejected']) <= full_max_length
+    #     )
+    #     logger.debug(f"Num eval_samples: {len(eval_dataset)}")
+    #     logger.debug("First eval example:")
+    #     logger.debug(eval_dataset[0]['prompt'] + eval_dataset[0]['chosen'])
 
-    logger.info("Loading model")
-    torch_dtype = (
-        args.torch_dtype
-        if args.torch_dtype in ["auto", None]
-        else getattr(torch, args.torch_dtype)
-    )
-    world_size = int(os.environ.get("WORLD_SIZE", 1))
-    ddp = world_size != 1
-    if ddp:
-        args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
-    if args.qlora and is_deepspeed_zero3_enabled():
-        logger.warning("ZeRO3 are both currently incompatible with QLoRA.")
+    # logger.info("Loading model")
+    # torch_dtype = (
+    #     args.torch_dtype
+    #     if args.torch_dtype in ["auto", None]
+    #     else getattr(torch, args.torch_dtype)
+    # )
+    # world_size = int(os.environ.get("WORLD_SIZE", 1))
+    # ddp = world_size != 1
+    # if ddp:
+    #     args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
+    # if args.qlora and is_deepspeed_zero3_enabled():
+    #     logger.warning("ZeRO3 are both currently incompatible with QLoRA.")
     
     # config = config_class.from_pretrained(
     #     args.model_name_or_path,
@@ -797,8 +797,8 @@ def main():
         def return_prompt_and_responses(samples) -> Dict[str, str]:
             return {
                 "prompt": ["Question: " + question + "\n\nAnswer: " for question in samples["question"]],
-                "chosen": samples["response_j"],
-                "rejected": samples["response_k"],
+                "chosen": samples["response_chosen"],
+                "rejected": samples["response_rejected"],
         }
 
         return dataset.map(
