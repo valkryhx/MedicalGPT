@@ -384,36 +384,48 @@ def main():
         torch_dtype=torch_dtype,
         cache_dir=args.cache_dir
     )
-    # model = model_class.from_pretrained(
-    #     args.model_name_or_path,
-    #     config=config,
-    #     low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
-    #     #device_map=args.device_map,
-    #     trust_remote_code=args.trust_remote_code,
-    #     quantization_config=BitsAndBytesConfig(
-    #         load_in_4bit=True,
-    #         bnb_4bit_use_double_quant=True,
-    #         bnb_4bit_quant_type="nf4",
-    #         bnb_4bit_compute_dtype=torch_dtype,
-    #     ) if args.qlora else None,
-    # ).to("cuda:0")
-
-    model = AutoModel.from_pretrained(
+    model = model_class.from_pretrained(
         args.model_name_or_path,
         config=config,
-        low_cpu_mem_usage=True,
-        torch_dtype=torch.float16,
-        load_in_4bit=True,
-        #device_map='auto',
+        low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
+        #device_map=args.device_map,
+        trust_remote_code=args.trust_remote_code,
         quantization_config=BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_use_double_quant=True,
             bnb_4bit_quant_type="nf4",
             bnb_4bit_compute_dtype=torch_dtype,
         ) if args.qlora else None,
-        trust_remote_code = True,
+    )
+
+    # model = AutoModel.from_pretrained(
+    #     args.model_name_or_path,
+    #     config=config,
+    #     low_cpu_mem_usage=True,
+    #     torch_dtype=torch.float16,
+    #     load_in_4bit=True,
+    #     #device_map='auto',
+    #     quantization_config=BitsAndBytesConfig(
+    #         load_in_4bit=True,
+    #         bnb_4bit_use_double_quant=True,
+    #         bnb_4bit_quant_type="nf4",
+    #         bnb_4bit_compute_dtype=torch_dtype,
+    #     ) if args.qlora else None,
+    #     trust_remote_code = True,
         
-    ).to("cuda:0")
+    # ).to("cuda:0")
+
+
+    # model = AutoPeftModelForCausalLM.from_pretrained(
+    #     args.model_name_or_path,
+    #     low_cpu_mem_usage=True,
+    #     torch_dtype=torch.float16,
+    #     load_in_4bit=True,
+    #     #device_map='auto',
+    #     quantization_config = q_config, # add q_config here for qlora
+    #     trust_remote_code = True,
+        
+    # ).to("cuda:0")
 
     
     # model_ref = model_class.from_pretrained(
@@ -429,7 +441,7 @@ def main():
     #         bnb_4bit_compute_dtype=torch_dtype,
     #     ) if args.qlora else None,
     # )
-    model_ref=copy.deepcopy(model).to("cuda:1")
+    # model_ref=copy.deepcopy(model).to("cuda:1")
     logger.error(f"id(model)={id(model)}")
     logger.error(f"id(model_ref)={id(model_ref)}")
     # Initialize our Trainer
