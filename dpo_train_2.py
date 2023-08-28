@@ -14,7 +14,7 @@ import copy
 import torch
 from datasets import load_dataset
 from loguru import logger
-from peft import LoraConfig, TaskType,AutoPeftModelForCausalLM
+from peft import LoraConfig, TaskType,AutoPeftModelForCausalLM , prepare_model_for_kbit_training,get_peft_model
 from transformers import (
     AutoConfig,
     BloomForCausalLM,
