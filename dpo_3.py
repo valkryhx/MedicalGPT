@@ -323,11 +323,15 @@ class MyDPOTrainer(DPOTrainer):
         logger.error(f"here chosen_rewards={chosen_rewards}")
         logger.error(f"here rejected_rewards={rejected_rewards}")
         reward_accuracies = (chosen_rewards > rejected_rewards).float()
-
+        logger.info(f"here reward_accuracies={reward_accuracies}")
+        # 这个reward_accuracies跟gradient_accumulation_steps有关 目前gradient_accumulation_steps=4 
+        # 所以每次是4对chosen_rewards与rejected_rewards比较 那难怪会在 [0 , 0.25 , 0.5 ,0.75] 之间跳 很离散 而且这样的话train过程中的acc其实没有多大指示性 毕竟只有4对
+        # 还是要看eval_acc才有用 理解了！
+        
         prefix = "eval_" if train_eval == "eval" else ""
         metrics[f"{prefix}rewards/chosen"] = chosen_rewards.cpu().numpy().mean()
         metrics[f"{prefix}rewards/rejected"] = rejected_rewards.cpu().numpy().mean()
-        metrics[f"{prefix}rewards/accuracies"] = reward_accuracies.cpu().numpy().mean()
+        metrics[f"{prefix}rewards/accuracies"] = reward_accuracies.cpu().numpy().mean()   # 难怪这里会求个mean 因为reward_acc是类似[1,0,1,1]这种True/False转成的1/0
         metrics[f"{prefix}rewards/margins"] = (chosen_rewards - rejected_rewards).cpu().numpy().mean()
         metrics[f"{prefix}logps/rejected"] = policy_rejected_logps.detach().cpu().numpy().mean()
         metrics[f"{prefix}logps/chosen"] = policy_chosen_logps.detach().cpu().numpy().mean()
