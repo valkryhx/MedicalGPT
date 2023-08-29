@@ -279,9 +279,66 @@ class MyDPOTrainer(DPOTrainer):
         ##查看
         logger.error(f"chosen_rewards={chosen_rewards}")
         logger.error(f"chosen_rewards.shape={chosen_rewards.shape}")
-        raise ValueError(123)
-      
         return losses, chosen_rewards, rejected_rewards   
+
+
+    def get_batch_metrics(
+        self,
+        model,
+        batch: Dict[str, Union[List, torch.LongTensor]],
+        train_eval: Literal["train", "eval"] = "train",
+    ):
+        """Compute the DPO loss and other metrics for the given batch of inputs for train or test."""
+        metrics = {}
+
+        (
+            policy_chosen_logps,
+            policy_rejected_logps,
+            policy_chosen_logits,
+            policy_rejected_logits,
+        ) = self.concatenated_forward(model, batch)
+        with torch.no_grad():
+            if self.ref_model is None:
+                with self.accelerator.unwrap_model(self.model).pretrained_model.disable_adapter():
+                    (
+                        reference_chosen_logps,
+                        reference_rejected_logps,
+                        _,
+                        _,
+                    ) = self.concatenated_forward(self.model, batch)
+            else:
+                (
+                    reference_chosen_logps,
+                    reference_rejected_logps,
+                    _,
+                    _,
+                ) = self.concatenated_forward(self.ref_model, batch)
+        
+        losses, chosen_rewards, rejected_rewards = self.dpo_loss(
+            policy_chosen_logps,
+            policy_rejected_logps,
+            reference_chosen_logps,
+            reference_rejected_logps,
+        )
+        logger.error(f"here chosen_rewards={chosen_rewards}")
+        logger.error(f"here rejected_rewards={rejected_rewards}")
+        reward_accuracies = (chosen_rewards > rejected_rewards).float()
+
+        prefix = "eval_" if train_eval == "eval" else ""
+        metrics[f"{prefix}rewards/chosen"] = chosen_rewards.cpu().numpy().mean()
+        metrics[f"{prefix}rewards/rejected"] = rejected_rewards.cpu().numpy().mean()
+        metrics[f"{prefix}rewards/accuracies"] = reward_accuracies.cpu().numpy().mean()
+        metrics[f"{prefix}rewards/margins"] = (chosen_rewards - rejected_rewards).cpu().numpy().mean()
+        metrics[f"{prefix}logps/rejected"] = policy_rejected_logps.detach().cpu().numpy().mean()
+        metrics[f"{prefix}logps/chosen"] = policy_chosen_logps.detach().cpu().numpy().mean()
+        metrics[f"{prefix}logits/rejected"] = policy_rejected_logits.detach().cpu().numpy().mean()
+        metrics[f"{prefix}logits/chosen"] = policy_chosen_logits.detach().cpu().numpy().mean()
+
+        return losses.mean(), metrics
+
+
+
+
 
 def main():
     parser = HfArgumentParser(ScriptArguments)
