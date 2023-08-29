@@ -132,6 +132,7 @@ class ScriptArguments:
         default=4, metadata={"help": "The number of processes to use for the preprocessing."},
     )
     # Training arguments
+    use_ref_model: bool = field(default=True, metadata={"help": "Whether to create a ref_model by yourself,set False will invoke the function to automatically create a ref_model."})
     use_peft: bool = field(default=True, metadata={"help": "Whether to use peft"})
     qlora: bool = field(default=False, metadata={"help": "Whether to use qlora"})
     target_modules: Optional[str] = field(default=None)
@@ -445,7 +446,8 @@ def main():
     #     ) if args.qlora else None,
     # )
     
-    model_ref=copy.deepcopy(model).to("cuda:1")
+    # 在使用普通loramodel当作训练模型时 ref_model=None 避免手动copy model 制造ref_model导致oom
+    model_ref=copy.deepcopy(model).to("cuda:1") if args.use_ref_model ==True else None
     
     logger.error(f"id(model)={id(model)}")
     logger.error(f"id(model_ref)={id(model_ref)}")
@@ -499,7 +501,7 @@ def main():
     logger.info(model) # 此时传入的这个model仍然还是base model 没有加上lora layers
     trainer = DPOTrainer(
         model,
-        ref_model = model_ref,
+        ref_model = model_ref,  # 在使用普通loramodel当作训练模型时 ref_model=None 避免手动copy model 制造ref_model导致oom
         args=training_args,
         beta=args.beta,
         train_dataset=train_dataset,
