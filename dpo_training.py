@@ -486,7 +486,7 @@ def main():
         lora_alpha=args.lora_alpha,
         lora_dropout=args.lora_dropout,
     )
-    logger.info(model)
+    logger.info(model) # 此时传入的这个model仍然还是base model 没有加上lora layers
     trainer = DPOTrainer(
         model,
         model_ref,
