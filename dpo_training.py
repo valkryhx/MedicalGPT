@@ -155,6 +155,8 @@ class ScriptArguments:
     gradient_accumulation_steps: Optional[int] = field(
         default=4, metadata={"help": "The number of gradient accumulation steps"}
     )
+    save_total_limit: Optional[int] = field(default=None, metadata={"help": "limit total numbers of checkpoints."})
+    load_best_model_at_end: Optional[bool] =field(default=False, metadata={"help": "whether to load the best checkpoints found during training."})
     save_steps: Optional[int] = field(default=50, metadata={"help": "X steps to save the model"})
     eval_steps: Optional[int] = field(default=50, metadata={"help": "X steps to evaluate the model"})
     logging_steps: Optional[int] = field(default=1, metadata={"help": "X steps to log the model"})
@@ -457,6 +459,8 @@ def main():
         max_steps=args.max_steps,
         logging_steps=args.logging_steps,
         save_steps=args.save_steps,
+        save_total_limit = args.save_total_limit,
+        load_best_model_at_end = args.load_best_model_at_end,
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         gradient_checkpointing=args.gradient_checkpointing,
         learning_rate=args.learning_rate,
