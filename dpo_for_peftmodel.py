@@ -402,7 +402,7 @@ def main():
     # )
   
     logger.error(f"args.qlora={args.qlora}")
-    model = AutoModel.from_pretrained(
+    model = AutoPeftModelForCausalLM.from_pretrained(
         args.model_name_or_path,
         #config=config,
         #low_cpu_mem_usage=True,
@@ -415,8 +415,7 @@ def main():
             bnb_4bit_quant_type="nf4",
             bnb_4bit_compute_dtype=torch_dtype,
         ) if args.qlora else None,
-        trust_remote_code = True,
-        
+        trust_remote_code = True,      
     ).to("cuda:0")
 
 
@@ -445,6 +444,7 @@ def main():
     #         bnb_4bit_compute_dtype=torch_dtype,
     #     ) if args.qlora else None,
     # )
+    
     model_ref=copy.deepcopy(model).to("cuda:1")
     
     logger.error(f"id(model)={id(model)}")
@@ -499,12 +499,12 @@ def main():
     logger.info(model) # 此时传入的这个model仍然还是base model 没有加上lora layers
     trainer = DPOTrainer(
         model,
-        model_ref,
+        ref_model = model_ref,
         args=training_args,
         beta=args.beta,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
-        tokenizer=tokenizer,
+        tokenizer = tokenizer, #　add to save tokenizer in every ckpt during training. 
         peft_config=peft_config if args.use_peft else None,
         max_prompt_length=args.max_source_length,
         max_length=full_max_length,
