@@ -1,7 +1,23 @@
 # -*- coding: utf-8 -*-
 """
-@author:XuMing(xuming624@qq.com)
-@description: Train a model from SFT using DPO
+用于演示 reward acc的来源 
+查看一下policy_chosen_logps 到底是啥
+这个reward_accuracies跟gradient_accumulation_steps有关 代码中默认是4 目前gradient_accumulation_steps=4 我在下面调用时显式的写出来
+所以每次是4对chosen_rewards与rejected_rewards比较 那难怪会在 [0 , 0.25 , 0.5 ,0.75] 之间跳 很离散 而且这样的话train过程中的acc其实没有多大指示性 毕竟只有4对
+还是要看eval_acc才有用 理解了！
+参考 https://github.com/valkryhx/MedicalGPT/blob/medGPT_0828/dpo_3.py#L327 和 L334
+求了 reward_acc的mean() 因为reward_acc是类似[1,0,0,1]这种比较结果后得到的True/False 再float()转成1./0.的tensor！参考下面的代码：¶
+
+import torch
+a=torch.tensor([1])
+b=torch.tensor([5])
+c=(a>b)
+print(c)
+print(c.float())
+输出
+tensor([False])
+tensor([0.])
+
 """
 
 import os
