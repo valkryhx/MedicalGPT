@@ -209,6 +209,8 @@ def find_all_linear_names(peft_model, int4=False, int8=False):
                 continue
             if 'output_layer' in name:
                 continue
+            if 'default' in name: ## add 20230829
+                continue 
             names = name.split('.')
             lora_module_names.add(names[0] if len(names) == 1 else names[-1])
     return sorted(lora_module_names)
