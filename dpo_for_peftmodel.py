@@ -408,7 +408,7 @@ def main():
         #low_cpu_mem_usage=True,
         torch_dtype=torch.float16,
         #load_in_4bit=True,
-        #device_map='auto',
+        device_map= {"":0},#'auto',
         quantization_config=BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_use_double_quant=True,
@@ -416,7 +416,7 @@ def main():
             bnb_4bit_compute_dtype=torch_dtype,
         ) if args.qlora else None,
         trust_remote_code = True,      
-    ).to("cuda:0")
+    )
 
 
     # model = AutoPeftModelForCausalLM.from_pretrained(
