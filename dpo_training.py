@@ -486,6 +486,7 @@ def main():
         lora_alpha=args.lora_alpha,
         lora_dropout=args.lora_dropout,
     )
+    logger.info(model)
     trainer = DPOTrainer(
         model,
         model_ref,
