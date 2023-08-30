@@ -442,7 +442,7 @@ def train():
         #low_cpu_mem_usage=True,
         torch_dtype=_compute_dtype_map[args.compute_dtype],#torch.float16,
         #load_in_4bit=True,
-        device_map= {"":0},#'auto',
+        device_map='auto', # {"":0}
         quantization_config=BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_use_double_quant=True,
