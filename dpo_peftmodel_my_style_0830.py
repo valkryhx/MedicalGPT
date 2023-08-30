@@ -442,7 +442,7 @@ def train():
             load_in_4bit=True,
             bnb_4bit_use_double_quant=True,
             bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=_compute_dtype_map[args.compute_dtype]),
+            bnb_4bit_compute_dtype=_compute_dtype_map[args.compute_dtype]
         ) if args.qlora else None,
         trust_remote_code = True,      
     )
