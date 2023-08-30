@@ -299,7 +299,7 @@ def train():
     hf_train_args.save_steps=args.save_steps,
     hf_train_args.save_total_limit = args.save_total_limit,
     hf_train_args.load_best_model_at_end = args.load_best_model_at_end,
-    logger.error(f"type_hf_train_args.load_best_model_at_end=type(hf_train_args.load_best_model_at_end)")
+    logger.error(f"type_hf_train_args.load_best_model_at_end={type(hf_train_args.load_best_model_at_end)}")
     raise ValueError(123)
     hf_train_args.gradient_accumulation_steps=args.gradient_accumulation_steps,
     hf_train_args.gradient_checkpointing=args.gradient_checkpointing,
