@@ -285,12 +285,13 @@ def train():
     # 从train_args_json中读取默认的超参数  以及 deepspeed配置文件的config内容 都存到hf_train_args 这个变量是真正的要传入trainer的args
     hf_parser = HfArgumentParser(TrainingArguments)
     hf_train_args, = hf_parser.parse_json_file(json_file=args.train_args_json)
-
+    logger.error(f"hf_train_args={hf_train_args}")
     # if args.deepspeed is not None :
     #     with open(args.deepspeed,'r',encoding='utf-8') as fr:   # 这里就是向TrainingArgs中添加deepseed字段
     #         hf_train_args.deepspeed = json.load(fr)  # set trainingArgs中deepspeed=ds_config
 
     # 使用命令行参数覆盖默认参数
+    logger.error(f"hf_train_args.per_device_train_batch_size={type(hf_train_args.per_device_train_batch_size)}")
     hf_train_args.per_device_train_batch_size=args.per_device_train_batch_size,
     hf_train_args.per_device_eval_batch_size=args.per_device_eval_batch_size,
     hf_train_args.max_steps=args.max_steps,
