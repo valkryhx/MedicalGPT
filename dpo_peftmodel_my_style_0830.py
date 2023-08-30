@@ -442,10 +442,10 @@ def train():
     model = AutoPeftModelForCausalLM.from_pretrained(
         args.model_name_or_path,
         #config=config,
-        low_cpu_mem_usage=True,
+        #low_cpu_mem_usage=True,
         torch_dtype=_compute_dtype_map[args.compute_dtype],#torch.float16,
-        load_in_4bit=args.load_in_4bit,
-        device_map='auto', # {"":0}
+        #load_in_4bit=args.load_in_4bit,
+        device_map={"":0},#'auto'
         quantization_config=BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_use_double_quant=True,
