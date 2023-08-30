@@ -285,42 +285,37 @@ def train():
     # 从train_args_json中读取默认的超参数  以及 deepspeed配置文件的config内容 都存到hf_train_args 这个变量是真正的要传入trainer的args
     hf_parser = HfArgumentParser(TrainingArguments)
     hf_train_args, = hf_parser.parse_json_file(json_file=args.train_args_json)
-    logger.error(f"hf_train_args={hf_train_args}")
+    
     # if args.deepspeed is not None :
     #     with open(args.deepspeed,'r',encoding='utf-8') as fr:   # 这里就是向TrainingArgs中添加deepseed字段
     #         hf_train_args.deepspeed = json.load(fr)  # set trainingArgs中deepspeed=ds_config
 
-    # 使用命令行参数覆盖默认参数
-    logger.error(f"hf_train_args.per_device_train_batch_size={type(hf_train_args.per_device_train_batch_size)}")
-    hf_train_args.per_device_train_batch_size=args.per_device_train_batch_size,
-    hf_train_args.per_device_eval_batch_size=args.per_device_eval_batch_size,
-    hf_train_args.max_steps=args.max_steps,
-    hf_train_args.num_train_epochs = args.num_train_epochs ,
-    hf_train_args.logging_steps=args.logging_steps,
-    hf_train_args.save_steps=args.save_steps,
-    hf_train_args.save_total_limit = args.save_total_limit,
-    logger.error(f"hf_train_args.load_best_model_at_end={hf_train_args.load_best_model_at_end}")
-    logger.error(f"args.load_best_model_at_end={args.load_best_model_at_end}")
-    logger.error(f"type_args.load_best_model_at_end={type(args.load_best_model_at_end)}")
-    logger.error(f"type_hf_train_args.load_best_model_at_end={type(hf_train_args.load_best_model_at_end)}")
-    hf_train_args.load_best_model_at_end = 123,#args.load_best_model_at_end,
-    logger.error(f"after hf_train_args.load_best_model_at_end={hf_train_args.load_best_model_at_end}")
-    logger.error(f"type_hf_train_args.load_best_model_at_end={type(hf_train_args.load_best_model_at_end)}")
-    raise ValueError(123)
-    hf_train_args.gradient_accumulation_steps=args.gradient_accumulation_steps,
-    hf_train_args.gradient_checkpointing=args.gradient_checkpointing,
-    hf_train_args.learning_rate=args.learning_rate,
-    hf_train_args.evaluation_strategy=args.eval_strategy,
-    hf_train_args.eval_steps=args.eval_steps,
-    hf_train_args.output_dir=args.output_dir,
-    hf_train_args.report_to=args.report_to,
-    hf_train_args.lr_scheduler_type=args.lr_scheduler_type,
-    hf_train_args.warmup_steps=args.warmup_steps,
-    hf_train_args.optim=args.optim,
-    hf_train_args.bf16=args.bf16,
-    hf_train_args.fp16=args.fp16,
-    hf_train_args.remove_unused_columns=args.remove_unused_columns,
-    hf_train_args.run_name=f"dpo_{args.model_type}",
+    # 使用命令行参数覆盖默认参数  注意赋值语句后千万不要加逗号 就是这样hf_train_args.per_device_train_batch_size=args.per_device_train_batch_size,
+    # 这个逗号会让赋值成为元组tuple 也就是让hf_train_args.xxx 的type成为tuple  这个错误贼奇特 第一次见 元组居然确实可以不加括号 我以为末尾是逗号，就会报错 结果语法没问题 
+    
+    hf_train_args.per_device_train_batch_size=args.per_device_train_batch_size
+    hf_train_args.per_device_eval_batch_size=args.per_device_eval_batch_size
+    hf_train_args.max_steps=args.max_steps
+    hf_train_args.num_train_epochs = args.num_train_epochs 
+    hf_train_args.logging_steps=args.logging_steps
+    hf_train_args.save_steps=args.save_steps
+    hf_train_args.save_total_limit = args.save_total_limit
+    
+    hf_train_args.load_best_model_at_end = 123,#args.load_best_model_at_end
+    hf_train_args.gradient_accumulation_steps=args.gradient_accumulation_steps
+    hf_train_args.gradient_checkpointing=args.gradient_checkpointing
+    hf_train_args.learning_rate=args.learning_rate
+    hf_train_args.evaluation_strategy=args.eval_strategy
+    hf_train_args.eval_steps=args.eval_steps
+    hf_train_args.output_dir=args.output_dir
+    hf_train_args.report_to=args.report_to
+    hf_train_args.lr_scheduler_type=args.lr_scheduler_type
+    hf_train_args.warmup_steps=args.warmup_steps
+    hf_train_args.optim=args.optim
+    hf_train_args.bf16=args.bf16
+    hf_train_args.fp16=args.fp16
+    hf_train_args.remove_unused_columns=args.remove_unused_columns
+    hf_train_args.run_name=f"dpo_{args.model_type}"
     hf_train_args.logging_dir = args.output_dir
 
     logger.debug(f"hf_train_args={hf_train_args}")
