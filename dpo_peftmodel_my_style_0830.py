@@ -278,8 +278,8 @@ def train():
     args = parser.parse_args_into_dataclasses()[0]  # 这次试用dataclass的方法
     logger.debug("123")
     logger.debug(args)
-    for item in args:
-        print(type(item))
+    logger.info(type(args.per_device_train_batch_size))
+    logger.info(type(args.load_best_model_at_end))
     raise ValueError(123)
     
     # 从train_args_json中读取默认的超参数  以及 deepspeed配置文件的config内容 都存到hf_train_args 这个变量是真正的要传入trainer的args
