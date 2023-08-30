@@ -202,7 +202,7 @@ class ScriptArguments:
     train_args_json: Optional[str] = field(default='luzi.json',metadata={"help": "默认TrainingArguments的json文件"})
     compute_dtype: Optional[str]=field(default='fp16',metadata={"help": "计算数据类型,可选范围为fp32,fp16,bf16"})
     local_rank: Optional[int]=field(default=0,metadata = {"help": "multi gpu scenario , for deepspeed use"})  
-    deepspeed:  Optional[str]=field(default="ds_zero2_config.json",metadata={"help": "指定deepspeed config file path"})
+    deepspeed:  Optional[str]=field(default=None,metadata={"help": "指定deepspeed config file path"})
     max_length: Optional[int] = field(default=512, metadata={"help": "没有用到。Max length of prompt+response text,整个QA长度的最大值"})
 
 def print_trainable_parameters(model):
@@ -280,8 +280,9 @@ def train():
     hf_parser = HfArgumentParser(TrainingArguments)
     hf_train_args, = hf_parser.parse_json_file(json_file=args.train_args_json)
 
-    with open(args.deepspeed,'r',encoding='utf-8') as fr:   # 这里就是向TrainingArgs中添加deepseed字段
-        hf_train_args.deepspeed = json.load(fr)  # set trainingArgs中deepspeed=ds_config
+    if args.deepspeed is not None :
+        with open(args.deepspeed,'r',encoding='utf-8') as fr:   # 这里就是向TrainingArgs中添加deepseed字段
+            hf_train_args.deepspeed = json.load(fr)  # set trainingArgs中deepspeed=ds_config
 
     # 使用命令行参数覆盖默认参数
     hf_train_args.per_device_train_batch_size=args.per_device_train_batch_size,
