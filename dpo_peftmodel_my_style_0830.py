@@ -49,6 +49,7 @@ import json
 from itertools import chain
 
 from trl import DPOTrainer
+from trl.models import create_reference_model
 
 _compute_dtype_map = {
     'fp32': torch.float32,
@@ -469,7 +470,8 @@ def train():
     )
     # 在使用普通loramodel当作训练模型时 ref_model=None 避免手动copy model 制造ref_model导致oom
     if args.use_ref_model ==True :
-        model_ref=copy.deepcopy(model)
+        #model_ref=copy.deepcopy(model)
+        model_ref = create_reference_model(model)
         model_ref.to("cuda:1")
         model_ref.eval()  # ref_model is not trainable
     else :
