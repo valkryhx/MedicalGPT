@@ -196,7 +196,7 @@ class ScriptArguments:
         default=False,
         metadata={"help": "Remove unused columns from the dataset if `datasets.Dataset` is used"},
     )
-    report_to: Optional[str] = field(default="tensorboard", metadata={"help": "Report to wandb or tensorboard"})
+    report_to: Optional[List[str]] = field(default=["tensorboard"], metadata={"help": "要么传一个list  比如['tensorboard','wandb'] 这样会保存两种格式的run log 要么写'all' 或者None"})
 
     ## add 20230830
     train_args_json: Optional[str] = field(default='luzi.json',metadata={"help": "默认TrainingArguments的json文件"})
