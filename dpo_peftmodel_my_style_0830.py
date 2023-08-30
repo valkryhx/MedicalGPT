@@ -308,7 +308,7 @@ def train():
     hf_train_args.evaluation_strategy=args.eval_strategy
     hf_train_args.eval_steps=args.eval_steps
     hf_train_args.output_dir=args.output_dir
-    hf_train_args.report_to=args.report_to
+    #hf_train_args.report_to=args.report_to
     hf_train_args.lr_scheduler_type=args.lr_scheduler_type
     hf_train_args.warmup_steps=args.warmup_steps
     hf_train_args.optim=args.optim
