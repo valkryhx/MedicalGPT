@@ -190,7 +190,7 @@ class ScriptArguments:
     eval_steps: Optional[int] = field(default=50, metadata={"help": "X steps to evaluate the model"})
     logging_steps: Optional[int] = field(default=1, metadata={"help": "X steps to log the model"})
     output_dir: Optional[str] = field(default="outputs-dpo", metadata={"help": "The output directory"})
-    max_steps: Optional[int] = field(default=200, metadata={"help": "Number of steps to train"})
+    max_steps: Optional[int] = field(default=-1, metadata={"help": "Number of steps to train, -1 means all ,positive value will override num_train_epochs effect."})
     eval_strategy: Optional[str] = field(default="steps", metadata={"help": "Evaluation strategy"})
     remove_unused_columns: Optional[bool] = field(
         default=False,
