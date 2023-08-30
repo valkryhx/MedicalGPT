@@ -196,8 +196,8 @@ class ScriptArguments:
         default=False,
         metadata={"help": "Remove unused columns from the dataset if `datasets.Dataset` is used"},
     )
-    report_to: Optional[List[str]] = field(
-        default=["tensorboard"], 
+    report_to: Optional[str] = field(
+        default=None, 
         metadata={"help": "要么传一个list  比如['tensorboard','wandb'] 这样会保存两种格式的run log 要么写'all' 或者'none'  "}
     )
 
