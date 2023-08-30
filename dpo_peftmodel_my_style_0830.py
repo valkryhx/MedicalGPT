@@ -276,7 +276,10 @@ def train():
     # 先读取命令行参数 因为其中有默认参数json file的path参数train_args_json
     parser = HfArgumentParser(ScriptArguments)
     args = parser.parse_args_into_dataclasses()[0]  # 这次试用dataclass的方法
-
+    logger.debug("123")
+    logger.debug(args)
+    raise ValueError(123)
+    
     # 从train_args_json中读取默认的超参数  以及 deepspeed配置文件的config内容 都存到hf_train_args 这个变量是真正的要传入trainer的args
     hf_parser = HfArgumentParser(TrainingArguments)
     hf_train_args, = hf_parser.parse_json_file(json_file=args.train_args_json)
