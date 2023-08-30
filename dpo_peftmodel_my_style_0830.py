@@ -200,6 +200,7 @@ class ScriptArguments:
 
     ## add 20230830
     train_args_json: Optional[str] = field(default='luzi.json',metadata={"help": "默认TrainingArguments的json文件"})
+    num_train_epochs: Optional[int]=field(default=5,metadata = {"help": "训练epoch"})
     compute_dtype: Optional[str]=field(default='fp16',metadata={"help": "计算数据类型,可选范围为fp32,fp16,bf16"})
     local_rank: Optional[int]=field(default=0,metadata = {"help": "multi gpu scenario , for deepspeed use"})  
     #deepspeed:  Optional[str]=field(default=None,metadata={"help": "指定deepspeed config file path"})
@@ -433,7 +434,7 @@ def train():
         args.model_name_or_path,
         #config=config,
         #low_cpu_mem_usage=True,
-        torch_dtype=_compute_dtype_map[args.compute_type],#torch.float16,
+        torch_dtype=_compute_dtype_map[args.compute_dtype],#torch.float16,
         #load_in_4bit=True,
         device_map= {"":0},#'auto',
         quantization_config=BitsAndBytesConfig(
