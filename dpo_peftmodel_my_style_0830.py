@@ -498,3 +498,5 @@ def train():
     tokenizer.save_pretrained(args.output_dir)
     trainer.model.save_pretrained(os.path.join(args.output_dir,"base_model"))
      
+    if __name__ =="__main__" :
+        train()
