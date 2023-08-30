@@ -308,6 +308,8 @@ def train():
     hf_train_args.run_name=f"dpo_{args.model_type}",
     hf_train_args.logging_dir = args.output_dir
 
+    logger.dubug(f"hf_train_args={hf_train_args}")
+    
     # 额外处理tokenizer 加载
     config_class, model_class, tokenizer_class = MODEL_CLASSES[args.model_type]
     if args.model_type == 'bloom':
