@@ -304,6 +304,7 @@ def train():
     logger.error(f"type_args.load_best_model_at_end={type(args.load_best_model_at_end)}")
     logger.error(f"type_hf_train_args.load_best_model_at_end={type(hf_train_args.load_best_model_at_end)}")
     hf_train_args.load_best_model_at_end = args.load_best_model_at_end,
+    logger.error(f"after hf_train_args.load_best_model_at_end={hf_train_args.load_best_model_at_end}")
     logger.error(f"type_hf_train_args.load_best_model_at_end={type(hf_train_args.load_best_model_at_end)}")
     raise ValueError(123)
     hf_train_args.gradient_accumulation_steps=args.gradient_accumulation_steps,
