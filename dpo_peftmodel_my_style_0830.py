@@ -469,7 +469,8 @@ def train():
     )
     # 在使用普通loramodel当作训练模型时 ref_model=None 避免手动copy model 制造ref_model导致oom
     if args.use_ref_model ==True :
-        model_ref=copy.deepcopy(model).to("cuda:1")
+        model_ref=copy.deepcopy(model)
+        model_ref.to("cuda:1")
         model_ref.eval()  # ref_model is not trainable
     else :
         model_ref = None
