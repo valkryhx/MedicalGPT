@@ -197,8 +197,13 @@ class ScriptArguments:
         metadata={"help": "Remove unused columns from the dataset if `datasets.Dataset` is used"},
     )
     report_to: Optional[str] = field(
+        ## 关于这个report_to 参数 我看了之前的sft/reward_model代码 都是不在命令行里面传的 直接使用从luzi.json配置文件中读取的"report_to":"tensorboard"配置 
+        ##  这个配置在hf_train_args.report_to会被转成 ['tensorboard'] 这是符合这个参数list[str]的格式的 因为相关的处理程序会遍历这个list 
+        ## 如果直接将ScriptArguments获取的args.report_to 赋值给hf_train_args 那么会导致hf_train_args.report_to= 'tensorboard' 而处理程序会遍历这个str 导致获取 t e n 。。。这一系列char来作为存放log的变量 
+        ## 所以会报错 t is not valid  please use tensorboard，wandb xxx等 这种诡异的错误
+        ## 为了使用这个变量 我在后面赋值时加一个[] 将 'tensorboard' 转成['tensorboard'],即hf_train_args.report_to=[args.report_to]
         default=None, 
-        metadata={"help": "要么传一个list  比如['tensorboard','wandb'] 这样会保存两种格式的run log 要么写'all' 或者'none'  "}
+        metadata={"help": "要么传一个list  比如['tensorboard','wandb'] 这样会保存两种格式的run log 要么写'all' 或者'none' 但是在命令行里面没法传list 所以实际上要么直接使用luzi.json中的'tensorboard'而不使用这个参数  "}
     )
 
     ## add 20230830
@@ -308,9 +313,15 @@ def train():
     hf_train_args.evaluation_strategy=args.eval_strategy
     hf_train_args.eval_steps=args.eval_steps
     hf_train_args.output_dir=args.output_dir
-    #hf_train_args.report_to=args.report_to
-    logger.error(f"hf_train_args.report_to={hf_train_args.report_to}")
-    raise ValueError(123)
+    
+    # hf_train_args.report_to=args.report_to
+    ## 关于这个report_to 参数 我看了之前的sft/reward_model代码 都是不在命令行里面传的 直接使用从luzi.json配置文件中读取的"report_to":"tensorboard"配置 
+        ##  这个配置在hf_train_args.report_to会被转成 ['tensorboard'] 这是符合这个参数list[str]的格式的 因为相关的处理程序会遍历这个list 
+        ## 如果直接将ScriptArguments获取的args.report_to 赋值给hf_train_args 那么会导致hf_train_args.report_to= 'tensorboard' 而处理程序会遍历这个str 导致获取 t e n 。。。这一系列char来作为存放log的变量 
+        ## 所以会报错 t is not valid  please use tensorboard，wandb xxx等 这种诡异的错误
+        ## 为了使用这个变量 我在后面赋值时加一个[] 将 'tensorboard' 转成['tensorboard'],即hf_train_args.report_to=[args.report_to]
+    hf_train_args.report_to=[args.report_to]
+    
     hf_train_args.lr_scheduler_type=args.lr_scheduler_type
     hf_train_args.warmup_steps=args.warmup_steps
     hf_train_args.optim=args.optim
