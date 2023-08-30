@@ -497,6 +497,9 @@ def train():
     trainer.save_model(args.output_dir)
     tokenizer.save_pretrained(args.output_dir)
     trainer.model.save_pretrained(os.path.join(args.output_dir,"base_model"))
-     
-    if __name__ =="__main__" :
-        train()
+
+
+# 执行流程
+if __name__ =="__main__" :    
+    train()
+
