@@ -199,7 +199,7 @@ class ScriptArguments:
     report_to: Optional[str] = field(default="tensorboard", metadata={"help": "Report to wandb or tensorboard"})
 
     ## add 20230830
-    train_args_json = field(default='luzi.json',metadata={"help": "默认TrainingArguments的json文件"})
+    train_args_json: Optional[str] = field(default='luzi.json',metadata={"help": "默认TrainingArguments的json文件"})
     compute_dtype: Optional[str]=field(default='fp16',metadata={"help": "计算数据类型,可选范围为fp32,fp16,bf16"})
     local_rank: Optional[int]=field(default=0,metadata = {"help": "multi gpu scenario , for deepspeed use"})  
     deepspeed:  Optional[str]=field(default="ds_zero2_config.json",metadata={"help": "指定deepspeed config file path"})
@@ -476,7 +476,7 @@ def train():
     trainer = DPOTrainer(
         model,
         ref_model = model_ref,  # 在使用普通loramodel当作训练模型时 ref_model=None 避免手动copy model 制造ref_model导致oom
-        args=training_args,
+        args=hf_train_args,
         beta=args.beta,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
