@@ -276,10 +276,7 @@ def train():
     # 先读取命令行参数 因为其中有默认参数json file的path参数train_args_json
     parser = HfArgumentParser(ScriptArguments)
     args = parser.parse_args_into_dataclasses()[0]  # 这次试用dataclass的方法
-    logger.debug("123")
-    logger.debug(args)
-    logger.info(type(args.per_device_train_batch_size))
-    logger.info(type(args.load_best_model_at_end))
+    
     
     
     # 从train_args_json中读取默认的超参数  以及 deepspeed配置文件的config内容 都存到hf_train_args 这个变量是真正的要传入trainer的args
@@ -301,7 +298,7 @@ def train():
     hf_train_args.save_steps=args.save_steps
     hf_train_args.save_total_limit = args.save_total_limit
     
-    hf_train_args.load_best_model_at_end = 123,#args.load_best_model_at_end
+    hf_train_args.load_best_model_at_end = args.load_best_model_at_end
     hf_train_args.gradient_accumulation_steps=args.gradient_accumulation_steps
     hf_train_args.gradient_checkpointing=args.gradient_checkpointing
     hf_train_args.learning_rate=args.learning_rate
