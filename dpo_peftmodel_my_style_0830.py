@@ -65,8 +65,8 @@ MODEL_CLASSES = {
 }
 
 # 关闭dataset的cache 这样每次都重新生成 测试用 不用cache避免使用到旧数据集
-from datasets import set_caching_enabled
-set_caching_enabled(False)
+# import datasets
+# datasets.disable_caching()
 
 
 
