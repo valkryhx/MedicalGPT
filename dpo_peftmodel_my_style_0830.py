@@ -201,9 +201,9 @@ class ScriptArguments:
     ## add 20230830
     train_args_json = field(default='luzi.json',metadata={"help": "默认TrainingArguments的json文件"})
     compute_dtype: Optional[str]=field(default='fp16',metadata={"help": "计算数据类型,可选范围为fp32,fp16,bf16"})
-    local_rank: Optional[int]=field(default=0,metadata{"help": "multi gpu scenario , for deepspeed use"})  
+    local_rank: Optional[int]=field(default=0,metadata = {"help": "multi gpu scenario , for deepspeed use"})  
     deepspeed:  Optional[str]=field(default="ds_zero2_config.json",metadata={"help": "指定deepspeed config file path"})
-    max_length: Optional[int] = field(default=512, metadata={"help": "Max length of prompt+response text,整个QA长度的最大值"})
+    max_length: Optional[int] = field(default=512, metadata={"help": "没有用到。Max length of prompt+response text,整个QA长度的最大值"})
 
 def print_trainable_parameters(model):
     """
