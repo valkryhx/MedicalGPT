@@ -289,6 +289,7 @@ def train():
     hf_train_args.per_device_train_batch_size=args.per_device_train_batch_size,
     hf_train_args.per_device_eval_batch_size=args.per_device_eval_batch_size,
     hf_train_args.max_steps=args.max_steps,
+    hf_train_args.num_train_epochs = args.num_train_epochs ,
     hf_train_args.logging_steps=args.logging_steps,
     hf_train_args.save_steps=args.save_steps,
     hf_train_args.save_total_limit = args.save_total_limit,
