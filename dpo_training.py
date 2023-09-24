@@ -214,7 +214,7 @@ def find_all_linear_names(peft_model, int4=False, int8=False):
 
 
 def return_prompt_and_responses(examples) -> Dict[str, str]:
-    """没有做tokenize 仍然是String的格式"""
+    #"""没有做tokenize 仍然是String的格式"""
     """Load the paired dataset and convert it to the necessary format.
 
     The dataset is converted to a dictionary with the following structure:
@@ -334,7 +334,7 @@ def main():
             load_from_cache_file=not args.overwrite_cache,
             desc="Running tokenizer on dataset",
         )
-         """没有做tokenize 仍然是String的格式"""
+        #"""没有做tokenize 仍然是String的格式"""
         train_dataset = tokenized_dataset.filter(
             lambda x: 0 < len(x['prompt'] + x['chosen']) <= full_max_length
                       and 0 < len(x['prompt'] + x['rejected']) <= full_max_length
