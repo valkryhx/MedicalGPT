@@ -472,16 +472,22 @@ class MyDPOTrainer(DPOTrainer):
                 "Your `Trainer` does not have an `accelerator` object. Consider upgrading `transformers`."
             )
 
-        if self.ref_model is None:
-            if not hasattr(
-                self.accelerator.unwrap_model(self.model).pretrained_model,
-                "disable_adapter",
-            ):
-                raise ValueError(
-                    "You are using a `peft` version that does not support `disable_adapter`. Please update your `peft` version to the latest version."
-                )
-        else:
-            self.ref_model = self.accelerator.prepare_model(self.ref_model, evaluation_mode=True) 
+        # if self.ref_model is None:
+        #     if not hasattr(
+        #         self.accelerator.unwrap_model(self.model).pretrained_model,
+        #         "disable_adapter",
+        #     ):
+        #         raise ValueError(
+        #             "You are using a `peft` version that does not support `disable_adapter`. Please update your `peft` version to the latest version."
+        #         )
+        # else:
+        #     self.ref_model = self.accelerator.prepare_model(self.ref_model, evaluation_mode=True) 
+        if ref_model is not None:
+            if self.is_deepspeed_enabled:
+                self.ref_model, = self.accelerator._prepare_deepspeed(self.ref_model)
+                self.ref_model.eval()
+            else:
+                self.ref_model = self.accelerator.prepare_model(self.ref_model, evaluation_mode=True)
 
     # not used
     def concatenated_forward(
@@ -898,7 +904,7 @@ def main():
     
     trainer = MyDPOTrainer(
         model,
-        ref_model=None,#model_ref,
+        ref_model=model_ref,
         args=training_args,
         beta=args.beta,
         train_dataset=train_dataset,
