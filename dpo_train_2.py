@@ -904,7 +904,7 @@ def main():
     
     trainer = MyDPOTrainer(
         model,
-        ref_model=model_ref,
+        ref_model=None,#model_ref,
         args=training_args,
         beta=args.beta,
         train_dataset=train_dataset,
