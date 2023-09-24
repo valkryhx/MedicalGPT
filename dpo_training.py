@@ -214,6 +214,7 @@ def find_all_linear_names(peft_model, int4=False, int8=False):
 
 
 def return_prompt_and_responses(examples) -> Dict[str, str]:
+    """没有做tokenize 仍然是String的格式"""
     """Load the paired dataset and convert it to the necessary format.
 
     The dataset is converted to a dictionary with the following structure:
@@ -326,13 +327,14 @@ def main():
             train_dataset = train_dataset.select(range(max_train_samples))
         logger.debug(f"Example train_dataset[0]: {train_dataset[0]}")
         tokenized_dataset = train_dataset.shuffle().map(
-            return_prompt_and_responses,
+            return_prompt_and_responses, #  没有做tokenize 仍然是String的格式
             batched=True,
             num_proc=args.preprocessing_num_workers,
             remove_columns=train_dataset.column_names,
             load_from_cache_file=not args.overwrite_cache,
             desc="Running tokenizer on dataset",
         )
+         """没有做tokenize 仍然是String的格式"""
         train_dataset = tokenized_dataset.filter(
             lambda x: 0 < len(x['prompt'] + x['chosen']) <= full_max_length
                       and 0 < len(x['prompt'] + x['rejected']) <= full_max_length
@@ -353,7 +355,7 @@ def main():
             eval_dataset = eval_dataset.select(range(max_eval_samples))
         logger.debug(f"Example eval_dataset[0]: {eval_dataset[0]}")
         eval_dataset = eval_dataset.map(
-            return_prompt_and_responses,
+            return_prompt_and_responses, #  没有做tokenize 仍然是String的格式
             batched=True,
             num_proc=args.preprocessing_num_workers,
             remove_columns=eval_dataset.column_names,
@@ -500,8 +502,8 @@ def main():
         eval_dataset=eval_dataset,
         tokenizer=tokenizer,
         peft_config=peft_config if args.use_peft else None,
-        max_prompt_length=args.max_source_length,
-        max_length=full_max_length,
+        max_prompt_length=args.max_source_length,  # 这个确实是提问句的长度限制 而不是提问句tokenized之后的长度限制 注意跟train_lora和sft_multi_turn.py 代码写法的区别
+        max_length=full_max_length,  # # 这个确实是整个提问句+回答句的长度限制 而不是提问句+回答句子 tokenized之后的长度限制 注意跟train_lora和sft_multi_turn.py 代码写法的区别
     )
     print_trainable_parameters(trainer.model)
 
