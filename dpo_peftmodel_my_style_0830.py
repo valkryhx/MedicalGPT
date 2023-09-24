@@ -203,7 +203,7 @@ class ScriptArguments:
         ## 如果直接将ScriptArguments获取的args.report_to 赋值给hf_train_args 那么会导致hf_train_args.report_to= 'tensorboard' 而处理程序会遍历这个str 导致获取 t e n 。。。这一系列char来作为存放log的变量 
         ## 所以会报错 t is not valid  please use tensorboard，wandb xxx等 这种诡异的错误
         ## 为了使用这个变量 我在后面赋值时加一个[] 将 'tensorboard' 转成['tensorboard'],即hf_train_args.report_to=[args.report_to]
-        default=None, 
+        default='tensorboard', 
         metadata={"help": "要么传一个list  比如['tensorboard','wandb'] 这样会保存两种格式的run log 要么写'all' 或者'none' 但是在命令行里面没法传list 所以实际上要么直接使用luzi.json中的'tensorboard'而不使用这个参数  "}
     )
 
