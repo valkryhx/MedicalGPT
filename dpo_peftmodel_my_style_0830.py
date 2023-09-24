@@ -402,6 +402,7 @@ def train():
         if args.max_train_samples is not None and args.max_train_samples > 0:
             max_train_samples = min(len(train_dataset), args.max_train_samples)
             train_dataset = train_dataset.shuffle().select(range(max_train_samples))
+            logger.error(f"按照文本长度过滤前 train_dataset数量={len(train_dataset)}")
         logger.debug(f"Example train_dataset[0]: {train_dataset[0]}")
         tokenized_dataset = train_dataset.shuffle().map(
             return_prompt_and_responses,
@@ -415,7 +416,7 @@ def train():
             lambda x: 0 < len(x['prompt'] + x['chosen']) <= full_max_length
                       and 0 < len(x['prompt'] + x['rejected']) <= full_max_length
         )
-        logger.debug(f"Num train_samples: {len(train_dataset)}")
+        logger.error(f"After filtering Num train_samples: {len(train_dataset)}")
         logger.debug("First train example:")
         logger.debug(train_dataset[0]['prompt'] + train_dataset[0]['chosen'])
 
@@ -429,6 +430,7 @@ def train():
         if args.max_eval_samples is not None and args.max_eval_samples > 0:
             max_eval_samples = min(len(eval_dataset), args.max_eval_samples)
             eval_dataset = eval_dataset.shuffle().select(range(max_eval_samples))
+            logger.error(f"按照文本长度过滤前 eval_dataset数量={len(eval_dataset)}")
         logger.debug(f"Example eval_dataset[0]: {eval_dataset[0]}")
         eval_dataset = eval_dataset.map(
             return_prompt_and_responses,
@@ -442,7 +444,7 @@ def train():
             lambda x: 0 < len(x['prompt'] + x['chosen']) <= full_max_length
                       and 0 < len(x['prompt'] + x['rejected']) <= full_max_length
         )
-        logger.debug(f"Num eval_samples: {len(eval_dataset)}")
+        logger.error(f"After filtering Num eval_samples: {len(eval_dataset)}")
         logger.debug("First eval example:")
         logger.debug(eval_dataset[0]['prompt'] + eval_dataset[0]['chosen'])
 
