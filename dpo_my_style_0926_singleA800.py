@@ -481,13 +481,13 @@ def train():
         #config=config,
         #low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
         torch_dtype=_compute_dtype_map[args.compute_dtype],#torch.float16,
-        device_map={"":0},#args.device_map,
+        device_map=args.device_map, #{"":0},
         trust_remote_code=True,#args.trust_remote_code,
         quantization_config=BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_use_double_quant=True,
             bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch_dtype,
+            bnb_4bit_compute_dtype=_compute_dtype_map[args.compute_dtype],
         ) if args.qlora else None,
     )
 
