@@ -41,7 +41,7 @@ from peft import (
     set_peft_model_state_dict,
     prepare_model_for_kbit_training,
     AutoPeftModelForCausalLM ,
-    PeftModelForCausalLM
+    #PeftModelForCausalLM
 )
 from peft.utils import TRANSFORMERS_MODELS_TO_LORA_TARGET_MODULES_MAPPING
 from transformers.deepspeed import HfDeepSpeedConfig ,is_deepspeed_zero3_enabled
@@ -456,7 +456,7 @@ def train():
         logger.warning("ZeRO3 are both currently incompatible with QLoRA.")
     logger.error(f"args.qlora={args.qlora}")
     
-    model = PeftModelForCausalLM.from_pretrained(
+    model = AutoPeftModelForCausalLM.from_pretrained(
         args.model_name_or_path, # 这是adapter的路径 不是base model的路径
         #config=config,
         #low_cpu_mem_usage=True,
