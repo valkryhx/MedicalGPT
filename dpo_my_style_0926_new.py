@@ -134,8 +134,8 @@ class ScriptArguments:
     template_name: Optional[str] = field(default="vicuna", metadata={"help": "The prompt template name."})
     per_device_train_batch_size: Optional[int] = field(default=4, metadata={"help": "Train batch size per device"})
     per_device_eval_batch_size: Optional[int] = field(default=1, metadata={"help": "Eval batch size per device"})
-    max_source_length: Optional[int] = field(default=256, metadata={"help": "Max length of prompt input text"})
-    max_target_length: Optional[int] = field(default=256, metadata={"help": "Max length of output text"})
+    max_source_length: Optional[int] = field(default=256, metadata={"help": "prompt部分的最大string长度，非tokenized后的最大token个数,Max length of prompt input text"})
+    max_target_length: Optional[int] = field(default=256, metadata={"help": "answer部分的最大string长度，非tokenized后的最大token个数Max length of output text"})
     min_target_length: Optional[int] = field(default=4, metadata={"help": "Min length of output text"})
     max_train_samples: Optional[int] = field(
         default=None,
