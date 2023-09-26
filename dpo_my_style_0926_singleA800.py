@@ -283,7 +283,7 @@ def return_prompt_and_responses(examples) -> Dict[str, str]:
 def train():  
     # 其实就是dpo官方例子的def main 改造
     ## STEP 0 从命令行获取参数，包括trainingArgs在内的，以及各类附属参数
-    logger.info("从json file中读取默认参数 并试用命令行参数覆盖")
+    logger.info("从json file中读取默认参数 并用命令行参数覆盖")
     
     # 先读取命令行参数 因为其中有默认参数json file的path参数train_args_json
     parser = HfArgumentParser(ScriptArguments)
