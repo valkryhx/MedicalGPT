@@ -401,7 +401,7 @@ def main():
             bnb_4bit_compute_dtype=torch_dtype,
         ) if args.qlora else None,
     )
-
+   
     # model = AutoModel.from_pretrained(
     #     args.model_name_or_path,
     #     config=config,
@@ -446,6 +446,8 @@ def main():
         ) if args.qlora else None,
     )
     # model_ref=copy.deepcopy(model).to("cuda:1")
+    logger.error(f"model.hf_device_map={model.hf_device_map}")
+    logger.error(f"model_ref.hf_device_map={model_ref.hf_device_map}")
     logger.error(f"id(model)={id(model)}")
     logger.error(f"id(model_ref)={id(model_ref)}")
     # Initialize our Trainer
