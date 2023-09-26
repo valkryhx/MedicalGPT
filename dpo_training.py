@@ -376,6 +376,7 @@ def main():
         else getattr(torch, args.torch_dtype)
     )
     world_size = int(os.environ.get("WORLD_SIZE", 1))
+    logger.error(f"world_size={world_size}")
     ddp = world_size != 1
     if ddp:
         args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
