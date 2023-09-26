@@ -450,7 +450,7 @@ def train():
         )
         logger.error(f"After filtering Num eval_samples: {len(eval_dataset)}")
         logger.debug("First eval example:")
-        logger.debug(eval_dataset[0]['prompt'] + eval_dataset[0]['chosen'])
+        logger.debug(f"eval_dataset[0]['prompt']={eval_dataset[0]['prompt']}\neval_dataset[0]['chosen']={eval_dataset[0]['chosen']}\neval_dataset[0]['rejected']={eval_dataset[0]['rejected']}")
 
     ## STEP 2  定义 data collator  本次使用trl库 不需要自定义 因为DPOTrainer发现 data collator为空时 会自动创建
     
