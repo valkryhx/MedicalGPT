@@ -486,7 +486,7 @@ def train():
         #config=config,
         #low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
         torch_dtype=_compute_dtype_map[args.compute_dtype],#torch.float16,
-        device_map=args.device_map, #{"":0},
+        device_map= {"":0}, # args.device_map, 打印model.hf_device_map 发现encoder.layer散布到不同的gpu可能会(dpo_training.py传basemodel就没事 这里传basemodel+peft就不行)导致RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cuda:1!
         trust_remote_code=True,#args.trust_remote_code,
         quantization_config=BitsAndBytesConfig(
             load_in_4bit=True,
