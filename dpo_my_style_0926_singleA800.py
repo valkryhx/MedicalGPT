@@ -337,7 +337,7 @@ def train():
 
     logger.debug(f"hf_train_args={hf_train_args}")
     
-    # 额外处理tokenizer 加载
+    
     config_class, model_class, tokenizer_class = MODEL_CLASSES[args.model_type]
     if args.model_type == 'bloom':
         args.use_fast_tokenizer = True
@@ -455,6 +455,11 @@ def train():
     ## STEP 2  定义 data collator  本次使用trl库 不需要自定义 因为DPOTrainer发现 data collator为空时 会自动创建
     
     ## STEP 3  load base model
+    world_size = int(os.environ.get("WORLD_SIZE", 1))
+    logger.error(f"world_size={world_size}")
+    ddp = world_size != 1
+    if ddp:
+        args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
     if args.qlora and is_deepspeed_zero3_enabled():
         logger.warning("ZeRO3 are both currently incompatible with QLoRA.")
     logger.error(f"args.qlora={args.qlora}")
