@@ -83,11 +83,13 @@ class ScriptArguments:
         metadata={"help": "Model type selected in the list: " + ", ".join(MODEL_CLASSES.keys())}
     )
     model_name_or_path: Optional[str] = field(
-        default=None, metadata={"help": "The model checkpoint for weights initialization."}
+        default=None, metadata={"help": "基座模型路径."}
     )
+    resume_from_checkpoint: Optional[str] = field(default=None, metadata={"help": "adapter路径."})
     tokenizer_name_or_path: Optional[str] = field(
         default=None, metadata={"help": "The tokenizer for weights initialization."}
     )
+    
     load_in_8bit: bool = field(default=False, metadata={"help": "Whether to load the model in 8bit mode or not."})
     load_in_4bit: bool = field(default=False, metadata={"help": "Whether to load the model in 4bit mode or not."})
     cache_dir: Optional[str] = field(
@@ -451,26 +453,26 @@ def train():
 
     ## STEP 2  定义 data collator  本次使用trl库 不需要自定义 因为DPOTrainer发现 data collator为空时 会自动创建
     
-    ## STEP 3  load model
+    ## STEP 3  load base model
     if args.qlora and is_deepspeed_zero3_enabled():
         logger.warning("ZeRO3 are both currently incompatible with QLoRA.")
     logger.error(f"args.qlora={args.qlora}")
     
-    model = AutoPeftModelForCausalLM.from_pretrained(
-        args.model_name_or_path, # 这是adapter的路径 不是base model的路径
-        #config=config,
-        #low_cpu_mem_usage=True,
-        torch_dtype=_compute_dtype_map[args.compute_dtype],#torch.float16,
-        #load_in_4bit=args.load_in_4bit,
-        device_map={"":0},#'auto'
-        quantization_config=BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=_compute_dtype_map[args.compute_dtype]
-        ) if args.qlora else None,
-        trust_remote_code = True,      
-    )
+    # model = AutoPeftModelForCausalLM.from_pretrained(
+    #     args.model_name_or_path, # 这是adapter的路径 不是base model的路径
+    #     #config=config,
+    #     #low_cpu_mem_usage=True,
+    #     torch_dtype=_compute_dtype_map[args.compute_dtype],#torch.float16,
+    #     #load_in_4bit=args.load_in_4bit,
+    #     device_map={"":0},#'auto'
+    #     quantization_config=BitsAndBytesConfig(
+    #         load_in_4bit=True,
+    #         bnb_4bit_use_double_quant=True,
+    #         bnb_4bit_quant_type="nf4",
+    #         bnb_4bit_compute_dtype=_compute_dtype_map[args.compute_dtype]
+    #     ) if args.qlora else None,
+    #     trust_remote_code = True,      
+    # )
 
     # 这个AutoPeftModelForCausalLM的用法是直接传入一个adapter的path，我不太熟，改成base_model + adapter 分开传的写法
     model = model_class.from_pretrained(
@@ -488,21 +490,7 @@ def train():
         ) if args.qlora else None,
     )
 
-
-    
-    logger.debug(f"model=\n{model}")
-    #raise ValueError("122")
-    # 在使用普通loramodel当作训练模型时 ref_model=None 避免手动copy model 制造ref_model导致oom
-    if args.use_ref_model ==True :
-        #model_ref=copy.deepcopy(model)
-        model_ref = create_reference_model(model)
-        model_ref.to("cuda:1")
-        model_ref.eval()  # ref_model is not trainable
-    else :
-        model_ref = None
-    logger.error(f"id(model)={id(model)}")
-    logger.error(f"id(model_ref)={id(model_ref)}")
-  
+    logger.debug(f"现在应该还是基座模型model=\n{model}")
     # Initialize our Trainer
     if args.gradient_checkpointing:
         model.gradient_checkpointing_enable()
@@ -512,7 +500,7 @@ def train():
     ## 建议add this line for training a model which params are frozen ,like lora.
     model.enable_input_require_grads()
 
-    ## STEP4 将model转化为peftModel 准备loRA微调 此时已经是个peftmodel 了 所以这里不用再写
+    ## STEP4 将model转化为peftModel ,并构造ref_model  准备loRA微调 
     # 构造参数 target_modules 这些modules是需要进行lora微调的
     target_modules = args.target_modules.split(',') if args.target_modules else None #可以写 dense,qkv... 逗号分隔 也可以直接写all
     if target_modules and 'all' in target_modules:
@@ -526,18 +514,49 @@ def train():
         lora_alpha=args.lora_alpha,
         lora_dropout=args.lora_dropout,
     )
-    logger.info(model) # 此时传入的这个model 是peft model 才对
+    model = get_peft_model(model, peft_config)
+    logger.debug("加上lora层后layers[27].self_attention.query_key_value.weight")
+    logger.debug(model.base_model.model.transformer.encoder.layers[27].self_attention.query_key_value.weight)
+    resume_from_checkpoint = args.resume_from_checkpoint
+    if resume_from_checkpoint is not None:
+        checkpoint_name = os.path.join(resume_from_checkpoint, 'pytorch_model.bin')
+        if not os.path.exists(checkpoint_name):
+            checkpoint_name = os.path.join(
+                resume_from_checkpoint, 'adapter_model.bin'
+            )
+            #resume_from_checkpoint = False 无用因为不是全量的trainer.train(resume_from_checkpoint=True/Fasle的用法)
+        if os.path.exists(checkpoint_name):
+            logger.info(f'DPO continually train from {checkpoint_name}')
+            adapters_weights = torch.load(checkpoint_name)
+            set_peft_model_state_dict(model, adapters_weights)
+        else:
+            logger.info(f'Adpater: {checkpoint_name} not found')
 
+    
+    logger.debug(model) # 此时传入的这个model 已经从base_model的typle转换成了peft model 
+    # 在使用普通loramodel当作训练模型时 ref_model=None 避免手动copy model 制造ref_model导致oom
+    if args.use_ref_model ==True :
+        #model_ref=copy.deepcopy(model)
+        model_ref = create_reference_model(model)
+        #model_ref.to("cuda:1") A800一张卡能放的下 不用放到另外的卡上
+        model_ref.eval()  # ref_model is not trainable
+    else :
+        model_ref = None
+    logger.error(f"id(model)={id(model)}")
+    logger.error(f"id(model_ref)={id(model_ref)}")
+
+
+    
     ## STEP 5 定义trainer
     trainer = DPOTrainer(
-        model,
+        model,   # 这里传 基座模型也可以 参考 dpo_training.py代码；传peft_model也可以参考使用AutoPeftModelForCausalLM的dpo_my_style.py ；传一个加载了adpater的peft model也行
         ref_model = model_ref,  # 在使用普通loramodel当作训练模型时 ref_model=None 避免手动copy model 制造ref_model导致oom
         args=hf_train_args,
         beta=args.beta,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         tokenizer = tokenizer, #　add to save tokenizer in every ckpt during training. 
-        peft_config=peft_config if args.use_peft else None,
+        peft_config=peft_config if args.use_peft else None,  # 无论model是基座模型和peft model，peft_config都支持
         max_prompt_length=args.max_source_length,
         max_length=full_max_length,
     )
