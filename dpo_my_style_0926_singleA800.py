@@ -540,14 +540,14 @@ def train():
 
     
     logger.debug(f"此时传入的这个model 已经从base_model的typle转换成了peft model\nmodel=model") # 此时传入的这个model 已经从base_model的typle转换成了peft model 
-    logger.error(f"model.hf_device_map=model.hf_device_map")
+    logger.error(f"model.hf_device_map={model.hf_device_map}")
     # 在使用普通loramodel当作训练模型时 ref_model=None 避免手动copy model 制造ref_model导致oom
     if args.use_ref_model ==True :
         #model_ref=copy.deepcopy(model)
         model_ref = create_reference_model(model)
         #model_ref.to("cuda:1") A800一张卡能放的下 不用放到另外的卡上
         model_ref.eval()  # ref_model is not trainable
-        logger.error(f"model_ref.hf_device_map=model_ref.hf_device_map")
+        logger.error(f"model_ref.hf_device_map={model_ref.hf_device_map}")
     else :
         model_ref = None
     logger.error(f"id(model)={id(model)}")
