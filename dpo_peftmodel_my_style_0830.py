@@ -456,7 +456,7 @@ def train():
     logger.error(f"args.qlora={args.qlora}")
     
     model = AutoPeftModelForCausalLM.from_pretrained(
-        args.model_name_or_path,
+        args.model_name_or_path, # 这是adapter的路径 不是base model的路径
         #config=config,
         #low_cpu_mem_usage=True,
         torch_dtype=_compute_dtype_map[args.compute_dtype],#torch.float16,
@@ -470,6 +470,8 @@ def train():
         ) if args.qlora else None,
         trust_remote_code = True,      
     )
+    logger.debug(f"model=\n{model}")
+    raise ValueError("122")
     # 在使用普通loramodel当作训练模型时 ref_model=None 避免手动copy model 制造ref_model导致oom
     if args.use_ref_model ==True :
         #model_ref=copy.deepcopy(model)
