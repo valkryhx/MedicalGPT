@@ -349,8 +349,9 @@ def train():
     }
     tokenizer_name_or_path = args.tokenizer_name_or_path
     if not tokenizer_name_or_path:
-        #tokenizer_name_or_path = args.model_name_or_path
-        raise ValueError("直接使用peft adpater当做model path 时必须额外传入tokenizer path，因为adapter中没有config.json 不能直接加载tokenizer！")
+        tokenizer_name_or_path = args.model_name_or_path
+        #AutoPeftModelForCausalLM.from_pretrained 已经不用
+        #raise ValueError("直接使用AutoPeftModelForCausalLM.from_pretrained方法 ，向model_name_or_path传入adpater path时必须额外传入tokenizer_name_or_path，因为adapter中没有config.json 不能直接加载tokenizer！")
     tokenizer = tokenizer_class.from_pretrained(tokenizer_name_or_path, **tokenizer_kwargs)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = 0  # set as the <unk> token
