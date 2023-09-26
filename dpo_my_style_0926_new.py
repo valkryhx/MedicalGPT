@@ -545,7 +545,7 @@ def train():
     if args.use_ref_model ==True :
         #model_ref=copy.deepcopy(model)
         model_ref = create_reference_model(model)
-        #model_ref.to("cuda:1") A800一张卡能放的下 不用放到另外的卡上
+        #model_ref.to("cuda:1") #不用写这句， model_ref 居然会神奇的自动放到cuda1上（如果自动检测到cuda1可用的话）
         model_ref.eval()  # ref_model is not trainable
         logger.error(f"model_ref.hf_device_map={model_ref.hf_device_map}")
     else :
