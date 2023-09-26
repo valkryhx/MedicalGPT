@@ -104,16 +104,16 @@ class ScriptArguments:
         default=False,
         metadata={"help": "Whether to use one of the fast tokenizer (backed by the tokenizers library) or not."},
     )
-    torch_dtype: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": (
-                "Override the default `torch.dtype` and load the model under this dtype. If `auto` is passed, the "
-                "dtype will be automatically derived from the model's weights."
-            ),
-            "choices": ["auto", "bfloat16", "float16", "float32"],
-        },
-    )
+    # torch_dtype: Optional[str] = field(
+    #     default=None,
+    #     metadata={
+    #         "help": (
+    #             "Override the default `torch.dtype` and load the model under this dtype. If `auto` is passed, the "
+    #             "dtype will be automatically derived from the model's weights."
+    #         ),
+    #         "choices": ["auto", "bfloat16", "float16", "float32"],
+    #     },
+    # )
     device_map: Optional[str] = field(
         default="auto",
         metadata={"help": "Device to map model to. If `auto` is passed, the device will be selected automatically. "},
