@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-# time: 2023/8/30 14:27
-# file: dpo_peftmodel_my_style.py
+# time: 2023/09/26 20:15
 # author: hx
 
 
@@ -52,6 +51,10 @@ from itertools import chain
 from trl import DPOTrainer
 from trl.models import create_reference_model
 
+from modeling_chatglm import ChatGLMForConditionalGeneration
+from tokenization_chatglm import ChatGLMTokenizer
+from configuration_chatglm import ChatGLMConfig
+
 _compute_dtype_map = {
     'fp32': torch.float32,
     'fp16': torch.float16,
@@ -60,7 +63,8 @@ _compute_dtype_map = {
 
 MODEL_CLASSES = {
     "bloom": (AutoConfig, BloomForCausalLM, BloomTokenizerFast),
-    "chatglm": (AutoConfig, AutoModel, AutoTokenizer),
+    #"chatglm": (AutoConfig, AutoModel, AutoTokenizer),
+    "chatglm":(ChatGLMConfig, ChatGLMForConditionalGeneration , ChatGLMTokenizer) ,
     "llama": (AutoConfig, LlamaForCausalLM, LlamaTokenizer),
     "baichuan": (AutoConfig, AutoModelForCausalLM, AutoTokenizer),
     "auto": (AutoConfig, AutoModelForCausalLM, AutoTokenizer),
