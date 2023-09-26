@@ -470,7 +470,7 @@ def train():
             bnb_4bit_compute_dtype=_compute_dtype_map[args.compute_dtype]
         ) if args.qlora else None,
         trust_remote_code = True,      
-    )
+    ) 
     logger.debug(f"model=\n{model}")
     #raise ValueError("122")
     # 在使用普通loramodel当作训练模型时 ref_model=None 避免手动copy model 制造ref_model导致oom
