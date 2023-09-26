@@ -458,7 +458,7 @@ def train():
     world_size = int(os.environ.get("WORLD_SIZE", 1))
     logger.error(f"world_size={world_size}")
     ddp = world_size != 1
-    if ddp:
+    if ddp:  # 原生的python/torchrun 才需要做下面的device_map处理 如果是deepspeed好像不需要将模型参数聚合到0卡 因为sft代码train_lora.py 就没有如下的额外处理 直接用device_map=auto
         args.device_map = {"": int(os.environ["LOCAL_RANK"]) or 0}
     if args.qlora and is_deepspeed_zero3_enabled():
         logger.warning("ZeRO3 are both currently incompatible with QLoRA.")
